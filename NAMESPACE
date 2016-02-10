@@ -1,0 +1,6 @@
+exportPattern("^[[:alpha:]]+")
+importFrom("IBrokers", "twsContract")
+importFrom("IBrokers", "twsConnect")
+importFrom("IBrokers", "reqHistoricalData")
+importFrom("zoo", "as.zoo")
+importFrom("zoo", "index")

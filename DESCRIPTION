@@ -1,0 +1,12 @@
+Package: IButils
+Type: Package
+Title: Utility Functions for the IBrokers Package
+Version: 0.0-1
+Date: 2016-02-10
+Maintainer: Enrico Schumann <es@enricoschumann.net>
+Authors@R: person("Enrico", "Schumann",
+                  role  = c("aut", "cre"),
+                  email = "es@enricoschumann.net")
+Description: Download historical data from IB.
+License: GPL-3
+Imports: IBrokers, zoo
