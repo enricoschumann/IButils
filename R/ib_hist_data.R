@@ -24,13 +24,17 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                 ": ", directory)
     }
 
-    by <- if (barSize  == "5 mins")
+    by <- if (barSize  == "1 min")
+              60*60*30
+          else if (barSize  == "5 mins")
               trunc(60*60*24*4.5)
           else if (barSize  == "1 secs")
               1990
     
     if (is.null(durationStr)) {
-        if (barSize  == "5 mins") {
+        if (barSize  == "1 min") {
+            durationStr <- "1 D"
+        } else if (barSize  == "5 mins") {
             durationStr <- "5 D"
         } else if (barSize  == "1 secs") {
             durationStr <- "2000 S"
@@ -122,50 +126,121 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
 
 
 
-require("IButils")
+## require("IButils")
 
-Symbol <- "FGBL MAR 16"
-Security_Type  <- "FUT"
-Exchange <- "DTB"
-Currency <- "EUR"
+## Symbol <- "T5O"
+## Security_Type  <- "STK"
+## Exchange <- "IBIS"
+## Currency <- "EUR"
 
-id <- "fgbl201603"
+## id <- "de000a0kfrj1"
 
-download_dir <- "~/Trading/Data/IB_downloads_check/"
-
-
-barSize <- "1 secs"
-whatToShow <- "TRADES"
-
-start <- as.POSIXct(as.Date("2015-09-1"))
-## end <- start + 86400*20
-
-ib_hist_data(Symbol = Symbol,
-             Security_Type = Security_Type,
-             Exchange = Exchange,
-             Currency = Currency,
-             id = id,
-             directory = download_dir,
-             barSize = barSize,
-             whatToShow = whatToShow,
-             start = start)
+## download_dir <- "~/Trading/Data/IB_downloads_check/"
 
 
+## barSize <- "1 secs"
+## whatToShow <- "MIDPOINT"
 
-## ## find files and assemble them
-files <- sort(dir(download_dir, pattern = paste0("^", id)))
-setwd(download_dir)
-alldata <- NULL
-for (f in files) {
-    message("Processing ", f)
-    if (length(readLines(f))) {
-        data <- read.table(f, header = TRUE, sep = ";")
-        names.data <- colnames(data)
-        if (!is.null(alldata))
-            data <- data[data[["timestamp"]] > max(alldata[["timestamp"]]), ]
-        alldata <- rbind(alldata, data)
+## start <- as.POSIXct(as.Date("2015-11-26"))
+## ## end <- start + 86400*20
+
+## ib_hist_data(Symbol = Symbol,
+##              Security_Type = Security_Type,
+##              Exchange = Exchange,
+##              Currency = Currency,
+##              id = id,
+##              directory = download_dir,
+##              barSize = barSize,
+##              whatToShow = whatToShow,
+##              start = start)
+
+
+
+## ## ## find files and assemble them
+## files <- sort(dir(download_dir, pattern = paste0("^", id)))
+## setwd(download_dir)
+## alldata <- NULL
+## for (f in files) {
+##     message("Processing ", f)
+##     if (length(readLines(f))) {
+##         data <- read.table(f, header = TRUE, sep = ";")
+##         names.data <- colnames(data)
+##         if (!is.null(alldata))
+##             data <- data[data[["timestamp"]] > max(alldata[["timestamp"]]), ]
+##         alldata <- rbind(alldata, data)
+##     }
+##     ## file.remove(f)
+## }
+
+## plot(.POSIXct(alldata[["timestamp"]]), alldata[["close"]], type = "S")
+
+
+## z <- zoo(alldata[["close"]],
+##          .POSIXct(alldata[["timestamp"]]))
+
+## ##save(z, file ="~/Aquila/Projects/2016_02_IMK/z.RData")
+
+
+
+## directory <- "~/Trading/Data/IB_downloads_check/"
+## dir(directory)
+
+combine_files <- function(directory,
+                          max.rows = -1,
+                          pattern = NULL,
+                          verbose = TRUE,
+                          prefix = "processed___",
+                          delete.processed = FALSE,
+                          actual.timestamp = FALSE) {
+
+    cwd <- getwd()
+    setwd(directory)
+    on.exit(setwd(cwd))
+
+    filenames <- dir(directory, full.names = FALSE)
+    if (is.null(prefix)) {
+        symbols <- gsub("(.*)_[0-9]+_[0-9]+$", "\\1", filenames)
+        symbols <- sort(unique(symbols))        
     }
-    ## file.remove(f)
-}
 
-plot(.POSIXct(alldata[["timestamp"]]), alldata[["close"]], type = "S")
+    for (s in symbols) {
+        alldata <- NULL
+        files <- filenames[grep(s, filenames)]
+        for (f in files) {
+            if (verbose)
+                message("processing ", f, appendLF=FALSE)
+
+            if (!length(readLines(f, n = 1))) {
+                if (verbose)
+                    message(" ... skipped (empty file) ... OK")
+                next
+            }
+            data <- read.table(f, header = TRUE, sep = ";", stringsAsFactors=FALSE)
+            if (!is.null(alldata))
+                data <- data[data[["timestamp"]] > max(alldata[["timestamp"]]), ]
+            alldata <- rbind(alldata, data)
+            if (verbose)
+                message(" ... OK ")
+            
+        }
+        ran <- if (actual.timestamp)
+                   range(alldata$timestamp)
+               else
+                   range(as.numeric(c(gsub(".*_([0-9]+)_[0-9]+$", "\\1", files),
+                                      gsub(".*_[0-9]+_([0-9]+)$", "\\1", files))))
+        outfile <- paste0(s, "_", paste(ran, collapse = "_"))
+        if (verbose)
+            message("===> write combined file ", outfile, appendLF = FALSE)
+        write.table(alldata, sep = ";",
+                    row.names = FALSE, col.names = TRUE,
+                    file = outfile)        
+        if (verbose)
+            message(" ... OK")
+        if (verbose)
+            message("===> rename files", appendLF = FALSE)
+        if (prefix != "")
+            file.rename(files, paste0(prefix, files))
+        if (verbose)
+            message(" ... OK")        
+    }
+}
