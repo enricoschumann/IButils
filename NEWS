@@ -1,0 +1,4 @@
+v0.1-0  (2016-02-26)
+
+  o initial version: the package provides functions for downloading
+    historical data from Interactive Brokers

@@ -1,0 +1,8 @@
+2016-02-26  Enrico Schumann  <es@enricoschumann.net>
+
+	* DESCRIPTION (Version): Version: 0.1-0
+
+2016-02-17  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (combine_files): new function
+

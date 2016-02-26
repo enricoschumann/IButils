@@ -127,22 +127,23 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
 
 
 ## require("IButils")
+## require("IBrokers")
 
-## Symbol <- "T5O"
-## Security_Type  <- "STK"
-## Exchange <- "IBIS"
-## Currency <- "EUR"
+## Symbol <- "ZQ   SEP 16"
+## Security_Type  <- "FUT"
+## Exchange <- "ECBOT"
+## Currency <- "USD"
 
-## id <- "de000a0kfrj1"
+## id <- "zq201609"
 
 ## download_dir <- "~/Trading/Data/IB_downloads_check/"
 
 
-## barSize <- "1 secs"
+## barSize <- "5 mins"
 ## whatToShow <- "MIDPOINT"
 
-## start <- as.POSIXct(as.Date("2015-11-26"))
-## ## end <- start + 86400*20
+## start <- as.POSIXct(as.Date("2013-01-01"))
+## end <- start + 86400*2000
 
 ## ib_hist_data(Symbol = Symbol,
 ##              Security_Type = Security_Type,
