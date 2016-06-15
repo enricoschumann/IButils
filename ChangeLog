@@ -1,3 +1,9 @@
+2016-06-01  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (ib_hist_data): new arguments
+	'skip.from', 'skip.until' and 'skip.tz' for skipping
+	intraday periods
+
 2016-02-26  Enrico Schumann  <es@enricoschumann.net>
 
 	* DESCRIPTION (Version): Version: 0.1-0

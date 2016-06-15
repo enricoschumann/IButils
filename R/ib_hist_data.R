@@ -7,6 +7,9 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                          whatToShow,
                          start = as.POSIXct(Sys.Date()-30), ## POSIXct
                          end   = Sys.time(),                ## POSIXct
+                         skip.from,
+                         skip.until,
+                         skip.tz = "",
                          verbose = TRUE) {
 
 
@@ -57,6 +60,22 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
     while (t < end) {
 
         t <- min(t + by, end)
+        if (barSize  == "1 secs") {
+            tmp <- as.POSIXlt(t, tz = skip.tz)
+            hms <- format(tmp, "%H:%M:%S")
+            if (!missing(skip.until) && hms < skip.until) {
+                t <- as.POSIXct(paste(format(t, "%Y-%m-%d"), skip.until))
+                message("skipped from ", hms, " to ", as.character(t))
+            }
+            if (!missing(skip.from) && hms > skip.from) {
+                t <- if (!missing(skip.until))
+                         as.POSIXct(paste(format(t+86400, "%Y-%m-%d"), skip.until))
+                     else
+                         as.POSIXct(paste(format(t, "%Y-%m-%d"), "23:59:59"))
+                    
+            }
+
+        }
         
         tws <- twsConnect(sample.int(1e8, 1))
         res <- NULL

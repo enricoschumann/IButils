@@ -41,7 +41,7 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
     rarely makes sense to set it explicitly.)
 }
   \item{whatToShow}{
-    TRADES, MIDPOINT, etc.
+    character: TRADES, MIDPOINT, BID or ASK
 }
   \item{start}{
     POSIXct
@@ -54,7 +54,7 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
 }
 }
 \details{
-Few.
+  See IB API documentation \url{https://interactivebrokers.github.io/}
 }
 \value{
   A character vector: the names of the file (including the directory)
