@@ -1,4 +1,16 @@
-2016-06-01  Enrico Schumann  <es@enricoschumann.net>
+2016-08-10  Enrico Schumann  <es@enricoschumann.net>
+
+	* DESCRIPTION (Version): Version: 0.1-2
+
+	* R/ib_hist_data.R (ib_hist_data): new
+	arguments 'accumulate' and 'trim'
+
+	* man/ib_hist_data.Rd: fix docs: add skip.*
+	arguments
+
+2016-06-15  Enrico Schumann  <es@enricoschumann.net>
+
+	* DESCRIPTION (Version): Version: 0.1-1
 
 	* R/ib_hist_data.R (ib_hist_data): new arguments
 	'skip.from', 'skip.until' and 'skip.tz' for skipping

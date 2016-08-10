@@ -10,7 +10,8 @@
 ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
              directory, barSize, durationStr = NULL, whatToShow,
              start = as.POSIXct(Sys.Date() - 30), end = Sys.time(),
-             verbose = TRUE)
+             skip.from, skip.until, skip.tz = "",
+             verbose = TRUE, trim = FALSE, accumulate = FALSE)
 }
 \arguments{
   \item{Symbol}{
@@ -49,7 +50,22 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   \item{end}{
     POSIXct
 }
+  \item{skip.from}{
+    character
+}
+  \item{skip.until}{
+    character
+}
+  \item{skip.tz}{
+    character
+}
   \item{verbose}{
+    logical
+}
+  \item{accumulate}{
+    logical
+}
+  \item{trim}{
     logical
 }
 }

@@ -10,8 +10,9 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                          skip.from,
                          skip.until,
                          skip.tz = "",
-                         verbose = TRUE) {
-
+                         verbose = TRUE,
+                         trim = FALSE,
+                         accumulate = FALSE) {
 
     if (end < start)
         stop("end < start")
@@ -48,8 +49,8 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                         sectype  = Security_Type,
                         exch = Exchange,
                         currency = Currency,
-                        include_expired =
-                            if (grepl("OPT|FUT|FOP", Security_Type)) "1" else "0",
+                        include_expired ="1",
+                            ## if (grepl("OPT|FUT|FOP", Security_Type)) "1" else "0",
                         conId = "", symbol = "", primary = "", 
                         expiry = "", strike = "", right = "", multiplier = "", 
                         combo_legs_desc = "", comboleg = "", secIdType = "", 
@@ -57,6 +58,9 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
 
     t <- start
 
+    if (accumulate)
+        all_data <- NULL
+    
     while (t < end) {
 
         t <- min(t + by, end)
@@ -74,7 +78,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                          as.POSIXct(paste(format(t, "%Y-%m-%d"), "23:59:59"))
                     
             }
-
+            
         }
         
         tws <- twsConnect(sample.int(1e8, 1))
@@ -111,6 +115,12 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
             
             data <- as.data.frame(as.matrix(res))
 
+            if (trim) {
+                ii <- index(res) >= start & index(res) <= end
+                times <- times[ii]
+                data <- data[ii, , drop = FALSE]
+            }
+            
             if (whatToShow == "TRADES") {
                 data <- data[ , -7L, drop = FALSE]
                 cnames <- c("timestamp", "open", "high", "low", "close",
@@ -125,6 +135,13 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
             
             data <- cbind(times, data)
             colnames(data) <- cnames
+
+            if (accumulate) {
+                all_data <- if (is.null(all_data))
+                                data
+                            else
+                                rbind(all_data, data)
+            }
             
             fn <- paste0(directory, id, "_", min(times), "_", max(times))
             
@@ -140,7 +157,8 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
 
         Sys.sleep(10)
     }
-    all_files
+    if (accumulate)
+        all_data else all_files
 }
 
 
@@ -263,4 +281,5 @@ combine_files <- function(directory,
         if (verbose)
             message(" ... OK")        
     }
+    alldata
 }
