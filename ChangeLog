@@ -1,3 +1,19 @@
+2016-10-07  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (ib_hist_data): explicitly
+	use expired contracts only for options,
+	futures, and options-on-futures; otherwise,
+	currencies would not work
+
+2016-10-02  Enrico Schumann  <es@enricoschumann.net>
+
+	* NAMESPACE: import from 'utils'
+
+2016-08-13  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (ib_hist_data): remove
+	duplicate timestamps when 'accumulate' is used
+
 2016-08-10  Enrico Schumann  <es@enricoschumann.net>
 
 	* DESCRIPTION (Version): Version: 0.1-2

@@ -37,7 +37,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
     
     if (is.null(durationStr)) {
         if (barSize  == "1 min") {
-            durationStr <- "1 D"
+            durationStr <- "3 D"
         } else if (barSize  == "5 mins") {
             durationStr <- "5 D"
         } else if (barSize  == "1 secs") {
@@ -49,8 +49,9 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                         sectype  = Security_Type,
                         exch = Exchange,
                         currency = Currency,
-                        include_expired ="1",
-                            ## if (grepl("OPT|FUT|FOP", Security_Type)) "1" else "0",
+                        include_expired =
+                            if (grepl("OPT|FUT|FOP", Security_Type))
+                                "1" else "0",
                         conId = "", symbol = "", primary = "", 
                         expiry = "", strike = "", right = "", multiplier = "", 
                         combo_legs_desc = "", comboleg = "", secIdType = "", 
@@ -140,7 +141,8 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                 all_data <- if (is.null(all_data))
                                 data
                             else
-                                rbind(all_data, data)
+                                rbind(all_data,
+                                      data[!(data$timestamp %in% all_data$timestamp), ])
             }
             
             fn <- paste0(directory, id, "_", min(times), "_", max(times))
