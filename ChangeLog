@@ -1,3 +1,8 @@
+2016-11-01  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (ib_hist_data): use
+	'file.path' to construct long filenames
+
 2016-10-07  Enrico Schumann  <es@enricoschumann.net>
 
 	* R/ib_hist_data.R (ib_hist_data): explicitly

@@ -22,11 +22,11 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
     if (is.null(id))
         id <- paste0(Symbol, Security_Type, Exchange, Currency, collapse = "-")
 
-    if (substr(directory, nchar(directory), nchar(directory)) != "/") {
-        directory <- paste0(directory, "/")
-        warning("trailing backslash added to ", sQuote("directory"),
-                ": ", directory)
-    }
+    ## if (substr(directory, nchar(directory), nchar(directory)) != "/") {
+    ##     directory <- paste0(directory, "/")
+    ##     warning("trailing backslash added to ", sQuote("directory"),
+    ##             ": ", directory)
+    ## }
 
     by <- if (barSize  == "1 min")
               60*60*30
@@ -100,7 +100,8 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
             if (verbose)
                 message("request data up to ", .POSIXct(max(times)),
                         ", but received no data")
-            fn <- paste0(directory, id, "_", c(unclass(t)), "_",  c(unclass(t)))
+            fn <- file.path(directory,
+                            paste0(id, "_", c(unclass(t)), "_",  c(unclass(t))))
             file.create(fn)
         } else {
             res <- as.zoo(res)
@@ -145,7 +146,8 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                                       data[!(data$timestamp %in% all_data$timestamp), ])
             }
             
-            fn <- paste0(directory, id, "_", min(times), "_", max(times))
+            fn <- file.path(directory,
+                            paste0(id, "_", min(times), "_", max(times)))
             
             write.table(data, sep = ";",
                         row.names = FALSE, col.names = TRUE,
