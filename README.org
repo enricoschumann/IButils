@@ -1,0 +1,50 @@
+* IButils -- Utility Functions for the IBrokers Package
+
+** Installing the package
+
+   The latest build of the package is always available from
+   [[http://enricoschumann.net/R/packages/IButils/index.htm]].
+
+   To install the package from within an R session, type:
+#+BEGIN_SRC R :eval never :export code
+install.packages('NMOF', type = 'source',
+                 repos = c('http://enricoschumann.net/R', getOption('repos')))
+#+END_SRC
+
+** Example: The British Pound's Flash Crash
+
+#+BEGIN_SRC R :exports code :session *R* :eval never
+  require("IButils")
+  x <- ib_hist_data("GBP.USD", "CASH", "IDEALPRO", "USD",
+                    directory = tempdir(),
+                    whatToShow = "MIDPOINT",
+                    barSize="1 secs",
+                    start = as.POSIXct("2016-10-7 00:00:00"),
+                    end = as.POSIXct("2016-10-7 02:00:00"),
+                    accumulate = TRUE)
+#+END_SRC
+
+#+RESULTS:
+
+Plot it.
+
+#+BEGIN_SRC R :exports code :session *R* :eval never
+plot(.POSIXct(x$timestamp), x$close, type = "s",
+     xlab = "", ylab = "USD per GBP")
+#+END_SRC
+
+#+RESULTS:
+
+
+
+** News, feedback and discussion
+
+   Please send bug reports or suggestions directly to the
+   package maintainer, for instance by using =bug.report=.
+
+#+BEGIN_SRC R :eval never :export code
+  require("utils")
+  bug.report("[IButils] Unexpected behaviour in function XXX", 
+             maintainer("IButils"), package = "IButils")
+#+END_SRC
+
