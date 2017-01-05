@@ -1,3 +1,7 @@
+2017-01-05  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (latest_timestamp): add function
+
 2016-11-03  Enrico Schumann  <es@enricoschumann.net>
 
 	* .Rbuildignore: add file, ignore README.org

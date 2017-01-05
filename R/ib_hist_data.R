@@ -22,12 +22,6 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
     if (is.null(id))
         id <- paste0(Symbol, Security_Type, Exchange, Currency, collapse = "-")
 
-    ## if (substr(directory, nchar(directory), nchar(directory)) != "/") {
-    ##     directory <- paste0(directory, "/")
-    ##     warning("trailing backslash added to ", sQuote("directory"),
-    ##             ": ", directory)
-    ## }
-
     by <- if (barSize  == "1 min")
               60*60*30
           else if (barSize  == "5 mins")
@@ -167,66 +161,6 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
 
 
 
-## require("IButils")
-## require("IBrokers")
-
-## Symbol <- "ZQ   SEP 16"
-## Security_Type  <- "FUT"
-## Exchange <- "ECBOT"
-## Currency <- "USD"
-
-## id <- "zq201609"
-
-## download_dir <- "~/Trading/Data/IB_downloads_check/"
-
-
-## barSize <- "5 mins"
-## whatToShow <- "MIDPOINT"
-
-## start <- as.POSIXct(as.Date("2013-01-01"))
-## end <- start + 86400*2000
-
-## ib_hist_data(Symbol = Symbol,
-##              Security_Type = Security_Type,
-##              Exchange = Exchange,
-##              Currency = Currency,
-##              id = id,
-##              directory = download_dir,
-##              barSize = barSize,
-##              whatToShow = whatToShow,
-##              start = start)
-
-
-
-## ## ## find files and assemble them
-## files <- sort(dir(download_dir, pattern = paste0("^", id)))
-## setwd(download_dir)
-## alldata <- NULL
-## for (f in files) {
-##     message("Processing ", f)
-##     if (length(readLines(f))) {
-##         data <- read.table(f, header = TRUE, sep = ";")
-##         names.data <- colnames(data)
-##         if (!is.null(alldata))
-##             data <- data[data[["timestamp"]] > max(alldata[["timestamp"]]), ]
-##         alldata <- rbind(alldata, data)
-##     }
-##     ## file.remove(f)
-## }
-
-## plot(.POSIXct(alldata[["timestamp"]]), alldata[["close"]], type = "S")
-
-
-## z <- zoo(alldata[["close"]],
-##          .POSIXct(alldata[["timestamp"]]))
-
-## ##save(z, file ="~/Aquila/Projects/2016_02_IMK/z.RData")
-
-
-
-## directory <- "~/Trading/Data/IB_downloads_check/"
-## dir(directory)
-
 combine_files <- function(directory,
                           max.rows = -1,
                           pattern = NULL,
@@ -286,4 +220,15 @@ combine_files <- function(directory,
             message(" ... OK")        
     }
     alldata
+}
+
+
+
+latest_timestamp <- function(directory, id) {
+    files <- sort(dir(directory, pattern = paste0("^", id, "_")))
+    latest <- if (length(files))
+                  max(as.numeric(gsub(".*_([0-9]+)$","\\1", files)))
+              else
+                  NA
+    latest
 }
