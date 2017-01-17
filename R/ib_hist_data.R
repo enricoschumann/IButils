@@ -223,7 +223,6 @@ combine_files <- function(directory,
 }
 
 
-
 latest_timestamp <- function(directory, id) {
     files <- sort(dir(directory, pattern = paste0("^", id, "_")))
     latest <- if (length(files))
@@ -231,4 +230,25 @@ latest_timestamp <- function(directory, id) {
               else
                   NA
     latest
+}
+
+flex_web_service <- function(file, token, query, version = 3) {
+    if (version != 3)
+        stop("only version 3 is supported")
+    if (is.numeric(token))
+        warning("token should be character")
+    u <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
+                "FlexStatementService.SendRequest?t=", token,
+                "&q=", query, "&v=", version)
+    res <- readLines(u)
+
+    if (res[[2L]] == "<Status>Success</Status>") {
+        ref_code <- gsub("<.?ReferenceCode>", "", res[[3L]])
+
+        u2 <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
+                    "FlexStatementService.GetStatement?q=", ref_code,
+                    "&t=", token, "&v=", version)
+
+        download.file(u2, file)
+    }                
 }

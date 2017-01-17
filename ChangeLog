@@ -1,3 +1,11 @@
+2017-01-16  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (flex_web_service): add function
+
+	* man/flex_web_service.Rd: add documentation
+
+	* NAMESPACE: import 'utils::download.file'
+
 2017-01-05  Enrico Schumann  <es@enricoschumann.net>
 
 	* R/ib_hist_data.R (latest_timestamp): add function
