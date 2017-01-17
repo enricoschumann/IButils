@@ -1,5 +1,7 @@
 2017-01-17  Enrico Schumann  <es@enricoschumann.net>
 
+        * DESCRIPTION (Version): 0.1-3
+
 	* R/ib_hist_data.R (flex_web_service): add function
 
 	* man/flex_web_service.Rd: add documentation
