@@ -11,16 +11,17 @@ install.packages('IButils, type = 'source',
                  repos = c('http://enricoschumann.net/R', getOption('repos')))
 #+END_SRC
 
+
 ** Example: The British Pound's Flash Crash
 
-#+BEGIN_SRC R :exports code :session *R* :eval never
+#+BEGIN_SRC R :exports code :session *R* :eval query
   require("IButils")
   x <- ib_hist_data("GBP.USD", "CASH", "IDEALPRO", "USD",
                     directory = tempdir(),
                     whatToShow = "MIDPOINT",
-                    barSize="1 secs",
+                    barSize = "1 secs",
                     start = as.POSIXct("2016-10-7 00:00:00"),
-                    end = as.POSIXct("2016-10-7 02:00:00"),
+                    end   = as.POSIXct("2016-10-7 02:00:00"),
                     accumulate = TRUE)
 #+END_SRC
 
@@ -28,12 +29,13 @@ install.packages('IButils, type = 'source',
 
 Plot it.
 
-#+BEGIN_SRC R :exports code :session *R* :eval never
-plot(.POSIXct(x$timestamp), x$close, type = "s",
-     xlab = "", ylab = "USD per GBP")
+#+BEGIN_SRC R :exports both :session *R* :eval query :results graphics :file ./GBPUSD_crash.png :width 600 :height 450
+  plot(.POSIXct(x$timestamp), x$close, type = "s",
+       xlab = "", ylab = "USD per GBP")
 #+END_SRC
 
 #+RESULTS:
+[[file:./GBPUSD_crash.png]]
 
 
 
