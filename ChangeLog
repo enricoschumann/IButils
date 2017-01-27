@@ -1,5 +1,7 @@
 2017-01-27  Enrico Schumann  <es@enricoschumann.net>
 
+        * DESCRIPTION (Version): 0.1-4
+
 	* R/ib_hist_data.R (flex_web_service): fix
 	return value (see function documentation);
 	check whether downloaded files contain messages

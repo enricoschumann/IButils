@@ -1,8 +1,8 @@
 Package: IButils
 Type: Package
 Title: Utility Functions for the IBrokers Package
-Version: 0.1-3
-Date: 2017-01-17
+Version: 0.1-4
+Date: 2017-01-27
 Maintainer: Enrico Schumann <es@enricoschumann.net>
 Authors@R: person("Enrico", "Schumann",
                   role  = c("aut", "cre"),
