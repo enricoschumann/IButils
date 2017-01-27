@@ -24,12 +24,24 @@ flex_web_service(file, token, query, version = 3)
 }
 }
 \details{
-  Retrieve flex queries via \code{\link{download.file}}.
+
+  Retrieve flex queries via
+  \code{\link{download.file}}.
+
+  The function also checks whether the downloaded file
+  contains messages from IB (lines that start with
+  \dQuote{\code{MSG}}).
+  
 }
 \value{
 
-  Currently nothing useful. The function is called for
-  its side effect: storing the flex query.
+  The function is called for its side effect:
+  downloading and storing the flex query.
+
+  If an attempt to download the report is made, the
+  value of \code{\link{download.file}} will be
+  returned. Otherwise, an error occured, and the return
+  value will be invisible 1.
 
 }
 \references{
@@ -39,7 +51,7 @@ flex_web_service(file, token, query, version = 3)
   Enrico Schumann
 }
 \seealso{
-  \code{\link{ib_hist_data}}
+  \code{\link{ib_hist_data}}, \code{\link{download.file}}
 }
 \examples{
 \dontrun{

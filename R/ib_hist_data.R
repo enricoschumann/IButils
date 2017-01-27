@@ -235,8 +235,8 @@ latest_timestamp <- function(directory, id) {
 flex_web_service <- function(file, token, query, version = 3) {
     if (version != 3)
         stop("only version 3 is supported")
-    if (is.numeric(token))
-        warning("token should be character")
+    if (!is.character(token))
+        warning(sQuote("token"), " should be character")
     u <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
                 "FlexStatementService.SendRequest?t=", token,
                 "&q=", query, "&v=", version)
@@ -249,6 +249,18 @@ flex_web_service <- function(file, token, query, version = 3) {
                     "FlexStatementService.GetStatement?q=", ref_code,
                     "&t=", token, "&v=", version)
 
-        download.file(u2, file)
-    }                
+        ans <- download.file(u2, file)
+        content <- readLines(file)
+        if (any(msg <- grepl("^[\"\']MSG", content))) {
+            if (sum(msg) > 1)
+                message("** Messages:")
+            else
+                message("** Message:")
+            cat(gsub("^[\"\']MSG.*?,", "", content[msg]), sep = "\n")
+        }                    
+    } else {
+        cat(res, sep = "\n")
+        ans <- 1
+    }
+    invisible(ans)
 }
