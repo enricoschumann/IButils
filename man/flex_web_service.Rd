@@ -39,9 +39,15 @@ flex_web_service(file, token, query, version = 3)
   downloading and storing the flex query.
 
   If an attempt to download the report is made, the
-  value of \code{\link{download.file}} will be
-  returned. Otherwise, an error occured, and the return
-  value will be invisible 1.
+  return value of \code{\link{download.file}} will be
+  returned. 
+
+  However, even if the download succeeds, the file may
+  contain an error message. Even mere \sQuote{messages}
+  often indicate that something did not work
+  (e.g. particular accounts could not be
+  included). Then, the return value will be invisible
+  1.
 
 }
 \references{

@@ -237,27 +237,37 @@ flex_web_service <- function(file, token, query, version = 3) {
         stop("only version 3 is supported")
     if (!is.character(token))
         warning(sQuote("token"), " should be character")
+
     u <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
-                "FlexStatementService.SendRequest?t=", token,
-                "&q=", query, "&v=", version)
+                "FlexStatementService.SendRequest",
+                "?t=", token,
+                "&q=", query,
+                "&v=", version)
     res <- readLines(u)
 
     if (res[[2L]] == "<Status>Success</Status>") {
+        
         ref_code <- gsub("<.?ReferenceCode>", "", res[[3L]])
-
         u2 <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
                     "FlexStatementService.GetStatement?q=", ref_code,
                     "&t=", token, "&v=", version)
-
         ans <- download.file(u2, file)
+
         content <- readLines(file)
         if (any(msg <- grepl("^[\"\']MSG", content))) {
             if (sum(msg) > 1)
-                message("** Messages:")
+                message("** Messages in file ", file, ":")
             else
-                message("** Message:")
+                message("** Message in file ", file, ":")
             cat(gsub("^[\"\']MSG.*?,", "", content[msg]), sep = "\n")
-        }                    
+            ans <- 1
+        }
+        if (content[[2L]] == "<Status>Warn</Status>") {
+            message("** Warning in file ", file, ":")
+            cat(gsub("<.?ErrorMessage>", "", content[[4L]]), sep = "\n")
+            ans <- 1
+        }
+        
     } else {
         cat(res, sep = "\n")
         ans <- 1
