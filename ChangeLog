@@ -1,3 +1,11 @@
+2017-03-14  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (ib_hist_data): argument
+	'trim' now has default TRUE
+	(flex_web_service): add a 1 second sleep before
+	data is retrieved, which seems to make the
+	download less prone to failure
+
 2017-02-07  Enrico Schumann  <es@enricoschumann.net>
 
 	* R/ib_hist_data.R (flex_web_service): check

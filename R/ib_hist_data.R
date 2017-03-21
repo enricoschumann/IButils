@@ -11,7 +11,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                          skip.until,
                          skip.tz = "",
                          verbose = TRUE,
-                         trim = FALSE,
+                         trim = TRUE,
                          accumulate = FALSE) {
 
     if (end < start)
@@ -244,7 +244,7 @@ flex_web_service <- function(file, token, query, version = 3) {
                 "&q=", query,
                 "&v=", version)
     res <- readLines(u)
-
+    Sys.sleep(1)
     if (res[[2L]] == "<Status>Success</Status>") {
         
         ref_code <- gsub("<.?ReferenceCode>", "", res[[3L]])
