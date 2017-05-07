@@ -38,6 +38,22 @@ Plot it.
 [[file:./GBPUSD_crash.png]]
 
 
+** Finding the contract specification
+
+To retrieve data of an instrument, you need four things:
+
+- its symbol
+
+- its type
+
+- its currency
+
+- its exchange
+
+
+[[file:TWS_Contract_Detail.png]]
+
+
 
 ** News, feedback and discussion
 
