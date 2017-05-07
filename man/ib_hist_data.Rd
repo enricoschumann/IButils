@@ -11,7 +11,7 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
              directory, barSize, durationStr = NULL, whatToShow,
              start = as.POSIXct(Sys.Date() - 30), end = Sys.time(),
              skip.from, skip.until, skip.tz = "",
-             verbose = TRUE, trim = FALSE, accumulate = FALSE)
+             verbose = TRUE, trim = TRUE, accumulate = FALSE)
 }
 \arguments{
   \item{Symbol}{

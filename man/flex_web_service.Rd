@@ -7,7 +7,7 @@
   Retrieve queries via the Flex Web Service.
 }
 \usage{
-flex_web_service(file, token, query, version = 3)
+flex_web_service(file, token, query, version = 3, delay = 2)
 }
 \arguments{
   \item{file}{
@@ -21,6 +21,10 @@ flex_web_service(file, token, query, version = 3)
 }
   \item{version}{
     integer; currently only 3 is supported
+}
+  \item{delay}{
+    integer: number of seconds to wait between sending
+    the token and retrieving the flex-data report
 }
 }
 \details{

@@ -232,7 +232,7 @@ latest_timestamp <- function(directory, id) {
     latest
 }
 
-flex_web_service <- function(file, token, query, version = 3) {
+flex_web_service <- function(file, token, query, version = 3, delay = 2) {
     if (version != 3)
         stop("only version 3 is supported")
     if (!is.character(token))
@@ -244,7 +244,7 @@ flex_web_service <- function(file, token, query, version = 3) {
                 "&q=", query,
                 "&v=", version)
     res <- readLines(u)
-    Sys.sleep(1)
+    Sys.sleep(delay)
     if (res[[2L]] == "<Status>Success</Status>") {
         
         ref_code <- gsub("<.?ReferenceCode>", "", res[[3L]])
