@@ -58,9 +58,9 @@ look as follows:
 
 [[file:TWS_Contract_Detail.png]]
 
-There you have it: Symbol (=C OESX DEC 17  3600=),
-Security Type (=OPT=), its Currency (=EUR=) and its
-Exchange (=DTB=).
+There you have it: Symbol (=C OESX DEC 17=\nbsp{}\nbsp{}
+=3600=), Security Type (=OPT=), its Currency (=EUR=)
+and its Exchange (=DTB=).
 
 (It may even be a good idea to copy the symbol from
 there: there may be several spaces within a symbol
