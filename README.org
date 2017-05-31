@@ -58,7 +58,7 @@ look as follows:
 
 [[file:TWS_Contract_Detail.png]]
 
-There you have it: Symbol (=C OESX DEC 17 3600=),
+There you have it: Symbol (=C OESX DEC 17  3600=),
 Security Type (=OPT=), its Currency (=EUR=) and its
 Exchange (=DTB=).
 
