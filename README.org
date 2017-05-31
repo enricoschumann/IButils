@@ -42,7 +42,7 @@ Plot it.
 
 To retrieve data of an instrument, you need four things:
 
-- its symbol
+- its local (native) symbol
 
 - its type
 
@@ -50,9 +50,20 @@ To retrieve data of an instrument, you need four things:
 
 - its exchange
 
+The easiest way to get these data is to first find the
+contract in the TWS, and check the /Contract
+Details/. For instance, for the call on the EURO STOXX
+50 that expires on 16 June 2017, the /Contract Details/
+look as follows:
 
 [[file:TWS_Contract_Detail.png]]
 
+There you have it: Symbol, Security Type (=OPT=), its
+Currency (=EUR=) and its Exchange (=DTB=).
+
+(It may even be a good idea to copy the symbol from
+there: there may be several spaces within a symbol
+string, which would be easy to miss otherwise.)
 
 
 ** News, feedback and discussion
