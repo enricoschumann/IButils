@@ -1,11 +1,15 @@
 2017-12-07  Enrico Schumann  <es@enricoschumann.net>
 
+	* DESCRIPTION (Version): 0.1-7
+
 	* R/ib_hist_data.R (flex_web_service): new
 	arguments 'no.write.msg' and 'no.write.warn',
 	with default TRUE: if a downloaded file
 	contains a message or a warning, the
-	destination file is not overwritten. (For the
-	old behaviour, set both arguments to FALSE.)
+	destination file is not written. (For the old
+	behaviour, set both arguments to FALSE.)
+	(flex_web_service): new argument 'verbose',
+	which currently only affects 'download.file'
 
 2017-05-07  Enrico Schumann  <es@enricoschumann.net>
 

@@ -7,7 +7,9 @@
   Retrieve queries via the Flex Web Service.
 }
 \usage{
-flex_web_service(file, token, query, version = 3, delay = 2)
+flex_web_service(file, token, query, version = 3, delay = 2,
+                 no.write.msg = TRUE, no.write.warn = TRUE,
+                 verbose = TRUE)
 }
 \arguments{
   \item{file}{
@@ -26,6 +28,16 @@ flex_web_service(file, token, query, version = 3, delay = 2)
     integer: number of seconds to wait between sending
     the token and retrieving the flex-data report
 }
+  \item{no.write.msg}{
+    logical: do not write file if it contains a message
+}
+  \item{no.write.warn}{
+    logical: do not write file if it contains a warning
+}
+  \item{verbose}{
+    logical: sets the 'quiet' argument of \code{\link{download.file}}
+}
+
 }
 \details{
 

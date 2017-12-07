@@ -235,7 +235,8 @@ latest_timestamp <- function(directory, id) {
 flex_web_service <- function(file, token, query,
                              version = 3, delay = 2,
                              no.write.msg = TRUE,
-                             no.write.warn = TRUE) {
+                             no.write.warn = TRUE,
+                             verbose = TRUE) {
     if (version != 3)
         stop("only version 3 is supported")
     if (!is.character(token))
@@ -255,7 +256,7 @@ flex_web_service <- function(file, token, query,
                     "FlexStatementService.GetStatement?q=", ref_code,
                     "&t=", token, "&v=", version)
         tmp <- tempfile()
-        ans <- download.file(u2, tmp)
+        ans <- download.file(u2, tmp, quiet = !verbose)
 
         content <- readLines(tmp)
         if (any(msg <- grepl("^[\"\']MSG", content))) {
@@ -267,7 +268,7 @@ flex_web_service <- function(file, token, query,
             if (!no.write.msg)
                 file.copy(tmp, file)
             else
-                message("file *not* written")
+                message("=> file ", file, " *not* written")
             ans <- 1
         }
         if (content[[2L]] == "<Status>Warn</Status>") {
@@ -276,7 +277,7 @@ flex_web_service <- function(file, token, query,
             if (!no.write.warn)
                 file.copy(tmp, file)
             else
-                message("file *not* written")
+                message("=> file ", file, " *not* written")
             ans <- 1
         }
         
