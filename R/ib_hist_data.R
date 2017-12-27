@@ -174,10 +174,13 @@ combine_files <- function(directory,
     on.exit(setwd(cwd))
 
     filenames <- dir(directory, full.names = FALSE)
-    if (is.null(prefix)) {
-        symbols <- gsub("(.*)_[0-9]+_[0-9]+$", "\\1", filenames)
-        symbols <- sort(unique(symbols))        
+    if (!is.null(prefix)) {
+        excl <- dir(directory, full.names = FALSE,
+                    pattern = paste0("^", prefix))
+        filenames <- setdiff(filenames, excl)
     }
+    symbols <- gsub("(.*)_[0-9]+_[0-9]+$", "\\1", filenames)
+    symbols <- sort(unique(symbols))        
 
     for (s in symbols) {
         alldata <- NULL

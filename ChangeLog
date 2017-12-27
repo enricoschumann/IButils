@@ -1,3 +1,8 @@
+2017-12-27  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (combine_files): fix
+	handling of 'prefix'
+
 2017-12-07  Enrico Schumann  <es@enricoschumann.net>
 
 	* DESCRIPTION (Version): 0.1-7
