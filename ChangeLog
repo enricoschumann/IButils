@@ -1,3 +1,8 @@
+2018-01-11  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (flex_web_service): refactor
+	code for 'no.write.msg' and 'no.write.warn'
+
 2017-12-27  Enrico Schumann  <es@enricoschumann.net>
 
 	* R/ib_hist_data.R (combine_files): fix

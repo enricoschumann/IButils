@@ -262,25 +262,24 @@ flex_web_service <- function(file, token, query,
         ans <- download.file(u2, tmp, quiet = !verbose)
 
         content <- readLines(tmp)
+        do.copy <- TRUE
         if (any(msg <- grepl("^[\"\']MSG", content))) {
-            if (sum(msg) > 1)
-                message("** Messages in file ", file, ":")
-            else
-                message("** Message in file ", file, ":")
+            message("** Message", if (sum(msg) > 1) "s",
+                    " in file ", file, ":")
             cat(gsub("^[\"\']MSG.*?,", "", content[msg]), sep = "\n")
-            if (!no.write.msg)
-                file.copy(tmp, file)
-            else
+            if (no.write.msg) {
+                do.copy <- FALSE
                 message("=> file ", file, " *not* written")
+            }
             ans <- 1
         }
         if (content[[2L]] == "<Status>Warn</Status>") {
             message("** Warning in file ", file, ":")
             cat(gsub("<.?ErrorMessage>", "", content[[4L]]), sep = "\n")
-            if (!no.write.warn)
-                file.copy(tmp, file)
-            else
+            if (no.write.warn) {
+                do.copy <- FALSE
                 message("=> file ", file, " *not* written")
+            }
             ans <- 1
         }
         
@@ -288,5 +287,9 @@ flex_web_service <- function(file, token, query,
         cat(res, sep = "\n")
         ans <- 1
     }
+    if (do.copy)
+        file.copy(tmp, file)
     invisible(ans)
 }
+
+                    
