@@ -256,13 +256,13 @@ flex_web_service <- function(file, token, query,
         
         ref_code <- gsub("<.?ReferenceCode>", "", res[[3L]])
         u2 <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
-                    "FlexStatementService.GetStatement?q=", ref_code,
-                    "&t=", token, "&v=", version)
+                     "FlexStatementService.GetStatement?q=", ref_code,
+                     "&t=", token, "&v=", version)
         tmp <- tempfile()
         ans <- download.file(u2, tmp, quiet = !verbose)
-
-        content <- readLines(tmp)
+        
         do.copy <- TRUE
+        content <- readLines(tmp)
         if (any(msg <- grepl("^[\"\']MSG", content))) {
             message("** Message", if (sum(msg) > 1) "s",
                     " in file ", file, ":")
@@ -284,11 +284,12 @@ flex_web_service <- function(file, token, query,
         }
         
     } else {
+        do.copy <- FALSE
         cat(res, sep = "\n")
         ans <- 1
     }
     if (do.copy)
-        file.copy(tmp, file)
+        file.copy(tmp, file, overwrite = TRUE)
     invisible(ans)
 }
 

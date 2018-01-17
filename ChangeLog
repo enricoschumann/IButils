@@ -1,3 +1,8 @@
+2018-01-17  Enrico Schumann  <es@enricoschumann.net>
+
+	* R/ib_hist_data.R (flex_web_service):
+	overwrite existing files
+
 2018-01-11  Enrico Schumann  <es@enricoschumann.net>
 
 	* R/ib_hist_data.R (flex_web_service): refactor
