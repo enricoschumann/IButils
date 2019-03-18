@@ -9,7 +9,8 @@
 \usage{
 combine_files(directory, max.rows = -1, pattern = NULL,
               verbose = TRUE, prefix = "processed___",
-              delete.processed = FALSE, actual.timestamp = FALSE)
+              delete.processed = FALSE, actual.timestamp = FALSE,
+              sep = ",")
 }
 \arguments{
   \item{directory}{
@@ -32,7 +33,11 @@ combine_files(directory, max.rows = -1, pattern = NULL,
 }
   \item{actual.timestamp}{
     logical
-}
+  }
+  \item{sep}{
+    character: the column separator
+  }
+
 }
 \details{
   Read CSV files and combine them into one large file per symbol.

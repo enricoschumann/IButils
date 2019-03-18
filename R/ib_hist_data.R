@@ -5,14 +5,17 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                          barSize,
                          durationStr = NULL,
                          whatToShow,
-                         start = as.POSIXct(Sys.Date()-30), ## POSIXct
-                         end   = Sys.time(),                ## POSIXct
+                         start = as.POSIXct(Sys.Date() - 30), ## POSIXct
+                         end   = Sys.time(),                  ## POSIXct
                          skip.from,
                          skip.until,
                          skip.tz = "",
                          verbose = TRUE,
                          trim = TRUE,
-                         accumulate = FALSE) {
+                         accumulate = FALSE,
+                         port = 7496,
+                         sep = ",",
+                         filename = "%id%_%start%_%end%") {
 
     if (end < start)
         stop("end < start")
@@ -76,7 +79,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
             
         }
         
-        tws <- twsConnect(sample.int(1e8, 1))
+        tws <- twsConnect(sample.int(1e8, 1), port = port)
         res <- NULL
         res <- reqHistoricalData(tws,
                                  endDateTime = strftime(t, format = "%Y%m%d %H:%M:%S"),
@@ -92,10 +95,15 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
         if (is.null(res)) {
             times <- as.integer(c(unclass(t)))
             if (verbose)
-                message("request data up to ", .POSIXct(max(times)),
+                message("request data up to ",
+                        .POSIXct(max(times)),
                         ", but received no data")
-            fn <- file.path(directory,
-                            paste0(id, "_", c(unclass(t)), "_",  c(unclass(t))))
+            fn0 <- fill_in(filename,
+                           id = id,
+                           start = c(unclass(t)),
+                           end = c(unclass(t)),
+                           delim = c("%", "%"))
+            fn <- file.path(directory, fn0)
             file.create(fn)
         } else {
             res <- as.zoo(res)
@@ -139,12 +147,18 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                                 rbind(all_data,
                                       data[!(data$timestamp %in% all_data$timestamp), ])
             }
+
+            fn0 <- fill_in(filename,
+                           id = id,
+                           start = min(times),
+                           end = max(times),
+                           delim = c("%", "%"))
+
+            fn <- file.path(directory, fn0)
             
-            fn <- file.path(directory,
-                            paste0(id, "_", min(times), "_", max(times)))
-            
-            write.table(data, sep = ";",
-                        row.names = FALSE, col.names = TRUE,
+            write.table(data, sep = sep,
+                        row.names = FALSE,
+                        col.names = TRUE,
                         file = fn)                
 
         }
@@ -153,10 +167,12 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
         if (.POSIXct(max(times)) >= end)
             break 
 
-        Sys.sleep(10)
+        Sys.sleep(10L)
     }
     if (accumulate)
-        all_data else all_files
+        all_data
+    else
+        all_files
 }
 
 
@@ -167,13 +183,17 @@ combine_files <- function(directory,
                           verbose = TRUE,
                           prefix = "processed___",
                           delete.processed = FALSE,
-                          actual.timestamp = FALSE) {
+                          actual.timestamp = FALSE,
+                          sep = ",") {
 
     cwd <- getwd()
     setwd(directory)
     on.exit(setwd(cwd))
 
-    filenames <- dir(directory, full.names = FALSE)
+    filenames <- list.files(directory,
+                            full.names = FALSE,
+                            recursive = FALSE,
+                            include.dirs = FALSE)
     if (!is.null(prefix)) {
         excl <- dir(directory, full.names = FALSE,
                     pattern = paste0("^", prefix))
@@ -189,12 +209,12 @@ combine_files <- function(directory,
             if (verbose)
                 message("processing ", f, appendLF=FALSE)
 
-            if (!length(readLines(f, n = 1))) {
+            if (length(readLines(f, n = 2)) < 2) {
                 if (verbose)
                     message(" ... skipped (empty file) ... OK")
                 next
             }
-            data <- read.table(f, header = TRUE, sep = ";", stringsAsFactors=FALSE)
+            data <- read.table(f, header = TRUE, sep = sep, stringsAsFactors=FALSE)
             if (!is.null(alldata))
                 data <- data[data[["timestamp"]] > max(alldata[["timestamp"]]), ]
             alldata <- rbind(alldata, data)
@@ -210,8 +230,10 @@ combine_files <- function(directory,
         outfile <- paste0(s, "_", paste(ran, collapse = "_"))
         if (verbose)
             message("===> write combined file ", outfile, appendLF = FALSE)
-        write.table(alldata, sep = ";",
-                    row.names = FALSE, col.names = TRUE,
+        write.table(alldata,
+                    sep = sep,
+                    row.names = FALSE,
+                    col.names = TRUE,
                     file = outfile)        
         if (verbose)
             message(" ... OK")
