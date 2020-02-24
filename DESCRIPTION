@@ -1,13 +1,15 @@
 Package: IButils
 Type: Package
 Title: Utility Functions for the IBrokers Package
-Version: 0.1-9
+Version: 0.1-8
 Date: 2019-03-18
 Maintainer: Enrico Schumann <es@enricoschumann.net>
 Authors@R: person("Enrico", "Schumann",
                   role  = c("aut", "cre"),
-                  email = "es@enricoschumann.net")
+                  email = "es@enricoschumann.net",
+                  comment = c(ORCID = "0000-0001-7601-6576"))
 Description: Download historical data and reports from IB.
 License: GPL-3
 Imports: IBrokers, textutils, zoo
-URL: http://enricoschumann.net/R/packages/IButils/
+URL: http://enricoschumann.net/R/packages/IButils/,
+     https://github.com/enricoschumann/IButils

@@ -31,7 +31,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
               trunc(60*60*24*4.5)
           else if (barSize  == "1 secs")
               1990
-    
+
     if (is.null(durationStr)) {
         if (barSize  == "1 min") {
             durationStr <- "3 D"
@@ -41,7 +41,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
             durationStr <- "2000 S"
         }
     }
-    
+
     twsc <- twsContract(local = Symbol,
                         sectype  = Security_Type,
                         exch = Exchange,
@@ -49,16 +49,16 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                         include_expired =
                             if (grepl("OPT|FUT|FOP", Security_Type))
                                 "1" else "0",
-                        conId = "", symbol = "", primary = "", 
-                        expiry = "", strike = "", right = "", multiplier = "", 
-                        combo_legs_desc = "", comboleg = "", secIdType = "", 
+                        conId = "", symbol = "", primary = "",
+                        expiry = "", strike = "", right = "", multiplier = "",
+                        combo_legs_desc = "", comboleg = "", secIdType = "",
                         secId = "")
 
     t <- start
 
     if (accumulate)
         all_data <- NULL
-    
+
     while (t < end) {
 
         t <- min(t + by, end)
@@ -74,11 +74,11 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                          as.POSIXct(paste(format(t+86400, "%Y-%m-%d"), skip.until))
                      else
                          as.POSIXct(paste(format(t, "%Y-%m-%d"), "23:59:59"))
-                    
+
             }
-            
+
         }
-        
+
         tws <- twsConnect(sample.int(1e8, 1), port = port)
         res <- NULL
         res <- reqHistoricalData(tws,
@@ -116,7 +116,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                         " [", weekdays(.POSIXct(min(times)), TRUE), "]",
                         " to ",                .POSIXct(max(times)),
                         " [", weekdays(.POSIXct(max(times)), TRUE), "]")
-            
+
             data <- as.data.frame(as.matrix(res))
 
             if (trim) {
@@ -124,7 +124,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                 times <- times[ii]
                 data <- data[ii, , drop = FALSE]
             }
-            
+
             if (whatToShow == "TRADES") {
                 data <- data[ , -7L, drop = FALSE]
                 cnames <- c("timestamp", "open", "high", "low", "close",
@@ -136,7 +136,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                 cnames <- c("timestamp", "open", "high", "low", "close")
             } else
                 stop("unknown ibpricetype")
-            
+
             data <- cbind(times, data)
             colnames(data) <- cnames
 
@@ -155,17 +155,17 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                            delim = c("%", "%"))
 
             fn <- file.path(directory, fn0)
-            
+
             write.table(data, sep = sep,
                         row.names = FALSE,
                         col.names = TRUE,
-                        file = fn)                
+                        file = fn)
 
         }
         all_files <- c(all_files, fn)
 
         if (.POSIXct(max(times)) >= end)
-            break 
+            break
 
         Sys.sleep(10L)
     }
@@ -200,7 +200,7 @@ combine_files <- function(directory,
         filenames <- setdiff(filenames, excl)
     }
     symbols <- gsub("(.*)_[0-9]+_[0-9]+$", "\\1", filenames)
-    symbols <- sort(unique(symbols))        
+    symbols <- sort(unique(symbols))
 
     for (s in symbols) {
         alldata <- NULL
@@ -220,7 +220,7 @@ combine_files <- function(directory,
             alldata <- rbind(alldata, data)
             if (verbose)
                 message(" ... OK ")
-            
+
         }
         ran <- if (actual.timestamp)
                    range(alldata$timestamp)
@@ -234,7 +234,7 @@ combine_files <- function(directory,
                     sep = sep,
                     row.names = FALSE,
                     col.names = TRUE,
-                    file = outfile)        
+                    file = outfile)
         if (verbose)
             message(" ... OK")
         if (verbose)
@@ -242,7 +242,7 @@ combine_files <- function(directory,
         if (prefix != "")
             file.rename(files, paste0(prefix, files))
         if (verbose)
-            message(" ... OK")        
+            message(" ... OK")
     }
     alldata
 }
@@ -275,14 +275,14 @@ flex_web_service <- function(file, token, query,
     res <- readLines(u)
     Sys.sleep(delay)
     if (res[[2L]] == "<Status>Success</Status>") {
-        
+
         ref_code <- gsub("<.?ReferenceCode>", "", res[[3L]])
         u2 <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
                      "FlexStatementService.GetStatement?q=", ref_code,
                      "&t=", token, "&v=", version)
         tmp <- tempfile()
         ans <- download.file(u2, tmp, quiet = !verbose)
-        
+
         do.copy <- TRUE
         content <- readLines(tmp)
         if (any(msg <- grepl("^[\"\']MSG", content))) {
@@ -304,7 +304,7 @@ flex_web_service <- function(file, token, query,
             }
             ans <- 1
         }
-        
+
     } else {
         do.copy <- FALSE
         cat(res, sep = "\n")
@@ -314,5 +314,3 @@ flex_web_service <- function(file, token, query,
         file.copy(tmp, file, overwrite = TRUE)
     invisible(ans)
 }
-
-                    
