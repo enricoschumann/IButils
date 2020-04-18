@@ -1,144 +1,158 @@
+2020-04-29  Enrico Schumann  <es@enricoschumann.net>
+
+        * DESCRIPTION (Version): 0.2-0
+	(Suggests): add 'rib' and 'uuid'
+
+        * R/rib.R (executions): add function for
+	getting executions
+
+2020-04-18  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib.R (positions): add function for
+        downloading current positions; uses package 'rib'
+	(order_status): add function to get order status
+
 2019-03-18  Enrico Schumann  <es@enricoschumann.net>
 
-	* DESCRIPTION (Version): 0.1-8
+        * DESCRIPTION (Version): 0.1-8
 
-	* R/ib_hist_data.R (ib_hist_data): new
-	arguments 'port', 'filename', and 'sep'. The
-	latter gets a default ","; in previous
-	versions, it had used ";"
-	(combine_files): new argument 'sep', with
-	default ","
+        * R/ib_hist_data.R (ib_hist_data): new
+        arguments 'port', 'filename', and 'sep'. The
+        latter gets a default ","; in previous
+        versions, it had used ";"
+        (combine_files): new argument 'sep', with
+        default ","
 
-	* NAMESPACE, DESCRIPTION (Imports): import
-	'textutils::fill_in'
+        * NAMESPACE, DESCRIPTION (Imports): import
+        'textutils::fill_in'
 
 2018-01-17  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (flex_web_service):
-	overwrite existing files
+        * R/ib_hist_data.R (flex_web_service):
+        overwrite existing files
 
 2018-01-11  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (flex_web_service): refactor
-	code for 'no.write.msg' and 'no.write.warn'
+        * R/ib_hist_data.R (flex_web_service): refactor
+        code for 'no.write.msg' and 'no.write.warn'
 
 2017-12-27  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (combine_files): fix
-	handling of 'prefix'
+        * R/ib_hist_data.R (combine_files): fix
+        handling of 'prefix'
 
 2017-12-07  Enrico Schumann  <es@enricoschumann.net>
 
-	* DESCRIPTION (Version): 0.1-7
+        * DESCRIPTION (Version): 0.1-7
 
-	* R/ib_hist_data.R (flex_web_service): new
-	arguments 'no.write.msg' and 'no.write.warn',
-	with default TRUE: if a downloaded file
-	contains a message or a warning, the
-	destination file is not written. (For the old
-	behaviour, set both arguments to FALSE.)
-	(flex_web_service): new argument 'verbose',
-	which currently only affects 'download.file'
+        * R/ib_hist_data.R (flex_web_service): new
+        arguments 'no.write.msg' and 'no.write.warn',
+        with default TRUE: if a downloaded file
+        contains a message or a warning, the
+        destination file is not written. (For the old
+        behaviour, set both arguments to FALSE.)
+        (flex_web_service): new argument 'verbose',
+        which currently only affects 'download.file'
 
 2017-05-07  Enrico Schumann  <es@enricoschumann.net>
 
-	* DESCRIPTION (Version): 0.1-6
+        * DESCRIPTION (Version): 0.1-6
 
 2017-05-03  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (flex_web_service): new
-	argument 'delay', which defines how long to
-	wait between sending the token and attempting
-	to download the report; default value is 2
+        * R/ib_hist_data.R (flex_web_service): new
+        argument 'delay', which defines how long to
+        wait between sending the token and attempting
+        to download the report; default value is 2
 
 2017-03-14  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (ib_hist_data): argument
-	'trim' now has default TRUE
-	(flex_web_service): add a 1 second sleep before
-	data is retrieved, which seems to make the
-	download less prone to failure
+        * R/ib_hist_data.R (ib_hist_data): argument
+        'trim' now has default TRUE
+        (flex_web_service): add a 1 second sleep before
+        data is retrieved, which seems to make the
+        download less prone to failure
 
 2017-02-07  Enrico Schumann  <es@enricoschumann.net>
 
-	* DESCRIPTION (Version): 0.1-5
+        * DESCRIPTION (Version): 0.1-5
 
-	* R/ib_hist_data.R (flex_web_service): check
-	whether downloaded files contain warnings/error
-	messages
+        * R/ib_hist_data.R (flex_web_service): check
+        whether downloaded files contain warnings/error
+        messages
 
 2017-01-27  Enrico Schumann  <es@enricoschumann.net>
 
         * DESCRIPTION (Version): 0.1-4
 
-	* R/ib_hist_data.R (flex_web_service): fix
-	return value (see function documentation);
-	check whether downloaded files contain messages
+        * R/ib_hist_data.R (flex_web_service): fix
+        return value (see function documentation);
+        check whether downloaded files contain messages
 
 2017-01-17  Enrico Schumann  <es@enricoschumann.net>
 
         * DESCRIPTION (Version): 0.1-3
 
-	* R/ib_hist_data.R (flex_web_service): add function
+        * R/ib_hist_data.R (flex_web_service): add function
 
-	* man/flex_web_service.Rd: add documentation
+        * man/flex_web_service.Rd: add documentation
 
-	* NAMESPACE: import 'utils::download.file'
+        * NAMESPACE: import 'utils::download.file'
 
 2017-01-05  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (latest_timestamp): add function
+        * R/ib_hist_data.R (latest_timestamp): add function
 
 2016-11-03  Enrico Schumann  <es@enricoschumann.net>
 
-	* .Rbuildignore: add file, ignore README.org
+        * .Rbuildignore: add file, ignore README.org
 
-	* README.org: add file
+        * README.org: add file
 
 2016-11-01  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (ib_hist_data): use
-	'file.path' to construct long filenames
+        * R/ib_hist_data.R (ib_hist_data): use
+        'file.path' to construct long filenames
 
 2016-10-07  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (ib_hist_data): explicitly
-	use expired contracts only for options,
-	futures, and options-on-futures; otherwise,
-	currencies would not work
+        * R/ib_hist_data.R (ib_hist_data): explicitly
+        use expired contracts only for options,
+        futures, and options-on-futures; otherwise,
+        currencies would not work
 
 2016-10-02  Enrico Schumann  <es@enricoschumann.net>
 
-	* NAMESPACE: import from 'utils'
+        * NAMESPACE: import from 'utils'
 
 2016-08-13  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (ib_hist_data): remove
-	duplicate timestamps when 'accumulate' is used
+        * R/ib_hist_data.R (ib_hist_data): remove
+        duplicate timestamps when 'accumulate' is used
 
 2016-08-10  Enrico Schumann  <es@enricoschumann.net>
 
-	* DESCRIPTION (Version): Version: 0.1-2
+        * DESCRIPTION (Version): Version: 0.1-2
 
-	* R/ib_hist_data.R (ib_hist_data): new
-	arguments 'accumulate' and 'trim'
+        * R/ib_hist_data.R (ib_hist_data): new
+        arguments 'accumulate' and 'trim'
 
-	* man/ib_hist_data.Rd: fix docs: add skip.*
-	arguments
+        * man/ib_hist_data.Rd: fix docs: add skip.*
+        arguments
 
 2016-06-15  Enrico Schumann  <es@enricoschumann.net>
 
-	* DESCRIPTION (Version): Version: 0.1-1
+        * DESCRIPTION (Version): Version: 0.1-1
 
-	* R/ib_hist_data.R (ib_hist_data): new arguments
-	'skip.from', 'skip.until' and 'skip.tz' for skipping
-	intraday periods
+        * R/ib_hist_data.R (ib_hist_data): new arguments
+        'skip.from', 'skip.until' and 'skip.tz' for skipping
+        intraday periods
 
 2016-02-26  Enrico Schumann  <es@enricoschumann.net>
 
-	* DESCRIPTION (Version): Version: 0.1-0
+        * DESCRIPTION (Version): Version: 0.1-0
 
 2016-02-17  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (combine_files): new function
+        * R/ib_hist_data.R (combine_files): new function
 

@@ -1,8 +1,23 @@
-exportPattern("^[[:alpha:]]+")
+export(
+    ib_hist_data,
+    combine_files,
+    latest_timestamp,
+    flex_web_service,
+
+    positions,
+    order_status,
+    executions,
+    contract_details
+    )
+    
+       
 importFrom("IBrokers", "reqHistoricalData")
 importFrom("IBrokers", "twsConnect")
 importFrom("IBrokers", "twsContract")
 importFrom("textutils", "fill_in")
 importFrom("zoo", "as.zoo")
 importFrom("zoo", "index")
-importFrom("utils", "read.table", "download.file", "write.table")
+importFrom("utils", "read.table", "download.file",
+           "write.table", "capture.output")
+
+S3method(print, order_status)
