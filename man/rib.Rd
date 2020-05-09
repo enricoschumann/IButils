@@ -9,7 +9,7 @@
 \description{
   Several convenience functions for
   connecting synchronously to the TWS.
-  
+
 }
 \usage{
 executions(port = 7496, clientId = 1)
@@ -34,7 +34,11 @@ positions(port = 7496, clientId = 1)
 
 }
 \value{
-  a \code{\link{data.frame}}
+
+  A \code{\link{data.frame}}. If there are no executions, orders or
+  positions, the functions return \code{NULL} invisibly.
+
+
 }
 %% \references{
 %% %% ~put references to the literature/web site here ~

@@ -1,16 +1,23 @@
+2020-05-09  Enrico Schumann  <es@enricoschumann.net>
+
+        * DESCRIPTION (Version): 0.2-1
+
+        * R/rib.R (executions): fix function when there
+	are no executions
+
 2020-04-29  Enrico Schumann  <es@enricoschumann.net>
 
         * DESCRIPTION (Version): 0.2-0
-	(Suggests): add 'rib' and 'uuid'
+        (Suggests): add 'rib' and 'uuid'
 
         * R/rib.R (executions): add function for
-	getting executions
+        getting executions
 
 2020-04-18  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.R (positions): add function for
         downloading current positions; uses package 'rib'
-	(order_status): add function to get order status
+        (order_status): add function to get order status
 
 2019-03-18  Enrico Schumann  <es@enricoschumann.net>
 

@@ -1,4 +1,9 @@
-v0.2-0  (2020-04-29))
+v0.2-1  (2020-05-09)
+
+  o fix 'executions': the function threw an error when
+    there were no executions
+  
+v0.2-0  (2020-04-29)
 
   o add functions 'executions', 'order_status' and
     'positions'.  These functions are based on and thus

@@ -273,6 +273,7 @@ executions <- function(port = 7496, clientId = 1) {
     capture.output(ic$checkMsg())
 
     ## --------------
+
     ic$reqExecutions(1, filter = rib::ExecutionFilter)
 
     ic$checkMsg()
@@ -280,8 +281,12 @@ executions <- function(port = 7496, clientId = 1) {
     ex <- as.data.frame(ex, stringsAsFactors = FALSE)
     for (cc in seq_len(length(ex)))
         ex[cc] <- unlist(ex[[cc]])
-    ex$time <- as.POSIXct(ex$time, format = "%Y%m%d %H:%M:%S")
-    ex
+    if (!is.null(ex$time))
+        ex$time <- as.POSIXct(ex$time, format = "%Y%m%d %H:%M:%S")
+    if (!nrow(ex))
+        invisible(NULL)
+    else
+        ex
 }
 
 send_orders <- function(orders, port = 7496, clientId = 1) {
