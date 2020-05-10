@@ -71,10 +71,28 @@ string, which would be easy to miss otherwise.)
 
 
 ** TWS helper functions
+   
+   The package provides several convenience functions.
+   The functions follow the same pattern: connect to
+   the TWS, send requests, receive and process results,
+   and disconnect.  Results are typically arranged as
+   data frames. The functions try to connect at port
+   7496, and with clientId 1.
+
 
    Fetch current positions.
-#+begin_src R :eval never :export both
+#+begin_src R :eval never :export both   
    positions()
+#+end_src
+
+  Get order status.
+#+begin_src R :eval never :export both   
+   order_status()
+#+end_src
+
+  Get information on executions.
+#+begin_src R :eval never :export both   
+   executions()
 #+end_src
 
 
