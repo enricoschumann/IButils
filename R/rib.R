@@ -19,7 +19,9 @@ orders <- function(account = "",
                       exchange,
                       currency,
                       amount,
+                      action,
                       type,
+                      lmtPrice,
                       uuid = NA_character_,
                       stringsAsFactors = FALSE)
     if (isTRUE(uuid))
@@ -31,20 +33,68 @@ orders <- function(account = "",
     res
 }
 
-write_orders <- function(dir, ...) {
+write_orders <- function(orders, dir, ...) {
     ## takes a data.frame of orders
     ## and writes to single files
 
+    for (i in seq_len(nrow(orders)))
+        write.table(orders[i, ], sep = ",",
+                    row.names = FALSE,
+                    col.names = TRUE,
+                    file = file.path(dir, orders[i, "uuid"]))
+
 }
 
-read_orders <- function(dir, ...) {
+read_orders <- function(dir, pattern = NULL, ...) {
     ## read single files into data.frame
-
+    fs <- list.files(dir, full.names = TRUE)
+    res <- vector("list", length(fs))
+    for (f in fs)
+        res[[f]] <- read.table(f, header = TRUE, sep = ",")
+    res <- do.call(rbind, res)
+    class(res) <- c("ib_orders", "data.frame")
+    res
 }
 
-send_orders <- function(dir, sent.dir, ...) {
-    ##
+send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
+    fs <- list.files(dir, full.names = TRUE)
 
+    wrap <- ib.wrap$new()
+    ic   <- IBClient$new(wrap)
+
+    ic$connect(port=7496, clientId=1)
+    capture.output(ic$checkMsg())
+
+    if (is.null(wrap$Data$nextId))
+        ic$reqIds()
+
+
+    for (f in fs) {
+        o <- read.table(f, header = TRUE, sep = ",")
+
+
+        ic$reqIds()
+        ic$checkMsg()
+        orderId <- wrap$Data$nextId
+
+        contract <- Contract
+        contract$localSymbol <- o$localSymbol
+        contract$exchange <- o$exchange
+        contract$currency <- o$currency
+        contract$secType <- o$secType
+        order <- IBOrder(o$action, o$amount, o$type, o$lmtPrice)
+        order$account <- o$account
+        order$orderRef <- o$uuid
+
+        ic$placeOrder(orderId, contract, order)
+        res <- ic$checkMsg()
+        copied <- file.copy(f, sent.dir)
+        if (copied)
+            file.remove(f)
+        else
+            stop("could not move file ", f)
+
+    }
 }
 
 update_orders <- function(dir, ...) {
@@ -339,7 +389,6 @@ contract_details <- function(localSymbol,
 
     capture.output(ic$checkMsg())
     ic$reqPositions()
-
 
 }
 
