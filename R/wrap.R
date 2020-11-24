@@ -4,7 +4,7 @@ ib.wrap <-
     cloneable=  FALSE,
     lock_class= TRUE,
 
-    inherit= IBWrap,
+    inherit= rib::IBWrap,
 
     public = list(
 

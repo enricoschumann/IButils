@@ -11,14 +11,13 @@ orders <- function(account = "",
                    lmtPrice,
                    uuid = TRUE) {
 
-    ## creates a data.frame of orders
     res <- data.frame(account,
                       instrument,
                       localSymbol,
                       secType,
                       exchange,
                       currency,
-                      amount,
+                      abs(amount),
                       action,
                       type,
                       lmtPrice,
@@ -60,29 +59,28 @@ send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
     fs <- list.files(dir, full.names = TRUE)
 
     wrap <- ib.wrap$new()
-    ic   <- IBClient$new(wrap)
+    ic   <- rib::IBClient$new(wrap)
 
     ic$connect(port=7496, clientId=1)
     capture.output(ic$checkMsg())
 
-    if (is.null(wrap$Data$nextId))
+    if (is.null(wrap$Data$nextId)) {
         ic$reqIds()
-
+        ic$checkMsg()
+    }
 
     for (f in fs) {
         o <- read.table(f, header = TRUE, sep = ",")
-
-
         ic$reqIds()
         ic$checkMsg()
         orderId <- wrap$Data$nextId
 
-        contract <- Contract
+        contract <- rib::Contract
         contract$localSymbol <- o$localSymbol
         contract$exchange <- o$exchange
         contract$currency <- o$currency
         contract$secType <- o$secType
-        order <- IBOrder(o$action, o$amount, o$type, o$lmtPrice)
+        order <- rib::IBOrder(o$action, o$amount, o$type, o$lmtPrice)
         order$account <- o$account
         order$orderRef <- o$uuid
 
@@ -93,8 +91,8 @@ send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
             file.remove(f)
         else
             stop("could not move file ", f)
-
     }
+    invisible(NULL)
 }
 
 update_orders <- function(dir, ...) {
@@ -339,7 +337,7 @@ executions <- function(port = 7496, clientId = 1) {
         ex
 }
 
-send_orders <- function(orders, port = 7496, clientId = 1) {
+send_orders2 <- function(orders, port = 7496, clientId = 1) {
 
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")

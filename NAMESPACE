@@ -7,6 +7,13 @@ export(
     positions,
     order_status,
     executions,
+    contract_details,
+
+    orders,
+    write_orders,
+    read_orders,
+    send_orders,
+
     contract_details
     )
     
