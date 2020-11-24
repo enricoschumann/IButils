@@ -8,19 +8,22 @@ ib.wrap <-
 
     public = list(
 
-        context = NULL,
         Data = NULL,
-
-        initialize = function() {
-        self$context <- new.env()
-        self$context$orders <- list()
-        self$context$completed_orders <- list()
-
+        
+    initialize = function() {
         self$Data <- new.env()
         self$Data$executions <- list()
         self$Data$positions <- list()
     },
+    
 
+    contractDetails = function(reqId, contractDetails) {
+        if (is.null(self$Data$contractDetails))
+            self$Data$contractDetails <- list()        
+        self$Data$contractDetails[[reqId]] <- contractDetails
+    },
+
+    contractDetailsEnd = function(reqId) message("done"),    
 
     error = function(id, errorCode, errorString) {
         cat(id, errorCode, errorString, "\n")
@@ -43,28 +46,28 @@ ib.wrap <-
     },
 
     openOrder= function(orderId, contract, order, orderstate) {
-        self$context$orders[[as.character(orderId)]] <- list(id=orderId, contract=contract, order=order, orderstate=orderstate)
-        self$context$order <- list(id=orderId, contract=contract, order=order, orderstate=orderstate)
+        self$Data$orders[[as.character(orderId)]] <- list(id=orderId, contract=contract, order=order, orderstate=orderstate)
+        self$Data$order <- list(id=orderId, contract=contract, order=order, orderstate=orderstate)
         ## cat("OpenOrder:", orderId, "\n")
     },
 
     openOrderEnd=       function() {
-        cat(length(self$context$orders), " open orders found\n")
+        cat(length(self$Data$orders), " open orders found\n")
     },
     completedOrder=     function(contract, order, orderState) {
-        ## self$context$completed <- list(contract=contract, order=order, orderstate=orderState)
+        ## self$Data$completed <- list(contract=contract, order=order, orderstate=orderState)
         ## browser()
-        self$context$completed_orders[[as.character(order$permId)]] <- list(contract=contract, order=order, orderstate=orderState)
+        self$Data$completed_orders[[as.character(order$permId)]] <- list(contract=contract, order=order, orderstate=orderState)
         ## cat("completedOrder.\n")
     },
 
     completedOrdersEnd= function() {
-        cat(length(self$context$completed_orders), " open orders found\n")
+        cat(length(self$Data$completed_orders), " open orders found\n")
     },
 
     execDetails=        function(reqId, contract, execution) {
-        self$context$ex_contract <- contract
-        self$context$execution <- execution
+        self$Data$ex_contract <- contract
+        self$Data$execution <- execution
         self$Data$executions[[execution$execId]] <- execution
         cat("ExecDetails:", reqId, contract$symbol, execution$side, execution$shares, execution$price, "\n")
     },

@@ -374,20 +374,52 @@ contract_details <- function(localSymbol,
                              secType,
                              exchange,
                              currency,
-                             port = 7496, clientId = 1) {
+                             includeExpired = TRUE,
+                             port = 7496, clientId = 1,
+                             raw = FALSE) {
 
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
-
-    wrap <- IBWrap.IButils$new()
+    wrap <- ib.wrap$new()
     ic   <- rib::IBClient$new(wrap)
-
-    capture.output(ic$connect(port = port, clientId = clientId))
+    msg <- capture.output(ic$connect(port = port, clientId = clientId))
+    msg <- c(capture.output(ic$checkMsg()))
     on.exit(ic$disconnect())
 
-    capture.output(ic$checkMsg())
-    ic$reqPositions()
-
+    if (isTRUE(includeExpired))
+        includeExpired <- rep(includeExpired, length(localSymbol))
+    if ((n <- length(localSymbol)) > 1L) {
+        if (length(secType == 1L))
+            secType <- rep(secType, n)
+        if (length(exchange == 1L))
+            exchange <- rep(exchange, n)
+        if (length(currency == 1L))
+            currency <- rep(currency, n)        
+    }
+    
+    for (i in seq_along(localSymbol)) {
+        Contract <- rib::Contract
+        Contract$localSymbol <- localSymbol[i]
+        Contract$secType <- secType[i]
+        Contract$exchange <- exchange[i]
+        Contract$currency <- currency[i]
+        Contract$includeExpired <- includeExpired[i]
+        
+        ic$reqContractDetails(i, Contract)
+        ic$checkMsg()
+    }
+    ans <- wrap$Data$contractDetails
+    if (!raw) {
+        n <- length(localSymbol)
+        tmp <- vector("list", n)
+        for (i in seq_len(n))
+            tmp[[i]] <- c(ans[[i]][-1L], ans[[i]]$contract)            
+        ans <- do.call(rbind, tmp)        
+    } else
+        ans
+    ic$disconnect()
+    on.exit()
+    ans
 }
 
 ib_hist_data2 <- function(contract,
