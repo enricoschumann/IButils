@@ -187,6 +187,8 @@ positions <- function(port = 7496, clientId = 1) {
             done <- TRUE
     }
 
+    ic$cancelPositions()
+    
     account <- unlist(lapply(wrap$Data$positions, `[[`, "account"))
 
     contract <- lapply(wrap$Data$positions, `[[`, "contract")

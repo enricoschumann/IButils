@@ -1,8 +1,8 @@
 Package: IButils
 Type: Package
 Title: Utility Functions for the Interactive Brokers API
-Version: 0.2-1
-Date: 2020-05-09
+Version: 0.3-0
+Date: 2021-02-12
 Maintainer: Enrico Schumann <es@enricoschumann.net>
 Authors@R: person("Enrico", "Schumann",
                   role  = c("aut", "cre"),

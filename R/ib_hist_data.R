@@ -1,4 +1,6 @@
-ib_hist_data <- function(Symbol, Security_Type, Exchange,
+ib_hist_data <- function(Symbol,
+                         Security_Type,
+                         Exchange,
                          Currency,
                          id = NULL,
                          directory,
@@ -7,6 +9,7 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                          whatToShow,
                          start = as.POSIXct(Sys.Date() - 30), ## POSIXct
                          end   = Sys.time(),                  ## POSIXct
+                         useRTH = FALSE,
                          skip.from,
                          skip.until,
                          skip.tz = "",
@@ -15,22 +18,16 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
                          accumulate = FALSE,
                          port = 7496,
                          sep = ",",
-                         filename = "%id%_%start%_%end%") {
+                         filename = "%id%_%start%_%end%",
+                         backend = NULL,
+                         clientId = NULL) {
 
+    all_files <- NULL
     if (end < start)
         stop("end < start")
 
-    all_files <- NULL
-
     if (is.null(id))
         id <- paste0(Symbol, Security_Type, Exchange, Currency, collapse = "-")
-
-    by <- if (barSize  == "1 min")
-              60*60*30
-          else if (barSize  == "5 mins")
-              trunc(60*60*24*4.5)
-          else if (barSize  == "1 secs")
-              1990
 
     if (is.null(durationStr)) {
         if (barSize  == "1 min") {
@@ -42,140 +39,240 @@ ib_hist_data <- function(Symbol, Security_Type, Exchange,
         }
     }
 
-    twsc <- twsContract(local = Symbol,
-                        sectype  = Security_Type,
-                        exch = Exchange,
-                        currency = Currency,
-                        include_expired =
-                            if (grepl("OPT|FUT|FOP", Security_Type))
-                                "1" else "0",
-                        conId = "", symbol = "", primary = "",
-                        expiry = "", strike = "", right = "", multiplier = "",
-                        combo_legs_desc = "", comboleg = "", secIdType = "",
-                        secId = "")
 
-    t <- start
 
-    if (accumulate)
-        all_data <- NULL
+    if (is.null(backend) ||
+        tolower(backend) == "ibrokers") {
 
-    while (t < end) {
 
-        t <- min(t + by, end)
-        if (barSize  == "1 secs") {
-            tmp <- as.POSIXlt(t, tz = skip.tz)
-            hms <- format(tmp, "%H:%M:%S")
-            if (!missing(skip.until) && hms < skip.until) {
-                t <- as.POSIXct(paste(format(t, "%Y-%m-%d"), skip.until))
-                message("skipped from ", hms, " to ", as.character(t))
+        by <- if (barSize  == "1 min")
+                  60*60*30
+              else if (barSize  == "5 mins")
+                  trunc(60*60*24*4.5)
+              else if (barSize  == "1 secs")
+                  1990
+
+
+        twsc <- twsContract(local = Symbol,
+                            sectype  = Security_Type,
+                            exch = Exchange,
+                            currency = Currency,
+                            include_expired =
+                                if (grepl("OPT|FUT|FOP", Security_Type))
+                                    "1" else "0",
+                            conId = "", symbol = "", primary = "",
+                            expiry = "", strike = "", right = "", multiplier = "",
+                            combo_legs_desc = "", comboleg = "", secIdType = "",
+                            secId = "")
+
+        t <- start
+
+        if (accumulate)
+            all_data <- NULL
+
+        while (t < end) {
+
+            t <- min(t + by, end)
+            if (barSize  == "1 secs") {
+                tmp <- as.POSIXlt(t, tz = skip.tz)
+                hms <- format(tmp, "%H:%M:%S")
+                if (!missing(skip.until) && hms < skip.until) {
+                    t <- as.POSIXct(paste(format(t, "%Y-%m-%d"), skip.until))
+                    message("skipped from ", hms, " to ", as.character(t))
+                }
+                if (!missing(skip.from) && hms > skip.from) {
+                    t <- if (!missing(skip.until))
+                             as.POSIXct(paste(format(t+86400, "%Y-%m-%d"), skip.until))
+                         else
+                             as.POSIXct(paste(format(t, "%Y-%m-%d"), "23:59:59"))
+
+                }
+
             }
-            if (!missing(skip.from) && hms > skip.from) {
-                t <- if (!missing(skip.until))
-                         as.POSIXct(paste(format(t+86400, "%Y-%m-%d"), skip.until))
-                     else
-                         as.POSIXct(paste(format(t, "%Y-%m-%d"), "23:59:59"))
+
+            tws <- twsConnect(sample.int(1e8, 1), port = port)
+            res <- NULL
+            res <- reqHistoricalData(tws,
+                                     endDateTime = strftime(t, format = "%Y%m%d %H:%M:%S"),
+                                     Contract = twsc,
+                                     barSize  = barSize,
+                                     duration = durationStr,
+                                     useRTH = "0",
+                                     whatToShow = whatToShow,
+                                     verbose = FALSE,
+                                     tickerId = "1")
+            close(tws)
+
+            if (is.null(res)) {
+                times <- as.integer(c(unclass(t)))
+                if (verbose)
+                    message("request data up to ",
+                            .POSIXct(max(times)),
+                            ", but received no data")
+                fn0 <- fill_in(filename,
+                               id = id,
+                               start = c(unclass(t)),
+                               end = c(unclass(t)),
+                               delim = c("%", "%"))
+                fn <- file.path(directory, fn0)
+                file.create(fn)
+            } else {
+                res <- as.zoo(res)
+                times <- as.integer(
+                    c(unclass(index(res)))) ## make POSIXct numeric
+                ## and strip 'tz'
+                if (verbose)
+                    message("request data up to ", t,
+                            ", received data from ", .POSIXct(min(times)),
+                            " [", weekdays(.POSIXct(min(times)), TRUE), "]",
+                            " to ",                .POSIXct(max(times)),
+                            " [", weekdays(.POSIXct(max(times)), TRUE), "]")
+
+                data <- as.data.frame(as.matrix(res))
+
+                if (trim) {
+                    ii <- index(res) >= start & index(res) <= end
+                    times <- times[ii]
+                    data <- data[ii, , drop = FALSE]
+                }
+
+                if (whatToShow == "TRADES") {
+                    data <- data[ , -7L, drop = FALSE]
+                    cnames <- c("timestamp", "open", "high", "low", "close",
+                                "volume", "vwap", "count")
+                } else if (whatToShow == "MIDPOINT" ||
+                           whatToShow == "BID" ||
+                           whatToShow == "ASK" ) {
+                    data <- data[ , 1:4, drop = FALSE]
+                    cnames <- c("timestamp", "open", "high", "low", "close")
+                } else
+                    stop("unknown ibpricetype")
+
+                data <- cbind(times, data)
+                colnames(data) <- cnames
+
+                if (accumulate) {
+                    all_data <- if (is.null(all_data))
+                                    data
+                                else
+                                    rbind(all_data,
+                                          data[!(data$timestamp %in% all_data$timestamp), ])
+                }
+
+                fn0 <- fill_in(filename,
+                               id = id,
+                               start = min(times),
+                               end = max(times),
+                               delim = c("%", "%"))
+
+                fn <- file.path(directory, fn0)
+
+                write.table(data, sep = sep,
+                            row.names = FALSE,
+                            col.names = TRUE,
+                            file = fn)
 
             }
+            all_files <- c(all_files, fn)
 
+            if (.POSIXct(max(times)) >= end)
+                break
+
+            Sys.sleep(10L)
         }
+        if (accumulate)
+            all_data
+        else
+            all_files
 
-        tws <- twsConnect(sample.int(1e8, 1), port = port)
-        res <- NULL
-        res <- reqHistoricalData(tws,
-                                 endDateTime = strftime(t, format = "%Y%m%d %H:%M:%S"),
-                                 Contract = twsc,
-                                 barSize  = barSize,
-                                 duration = durationStr,
-                                 useRTH = "0",
+
+    } else if (tolower(backend) == "rib") {
+
+        contract <- rib::IBContract(localSymbol = Symbol,
+                                    secType  = Security_Type,
+                                    exchange = Exchange,
+                                    currency = Currency)
+
+        H <- NULL
+        wrap <- rib::IBWrapSimple$new()
+        ic <- rib::IBClient$new(wrap)
+        cid <- if (is.null(clientId))
+                   sample(1e8, size = 1) else clientId
+        ic$connect(port = port, clientId = cid)
+        on.exit(ic$disconnect())
+
+        wait <- 0.2
+        ic$checkMsg(timeout = wait)
+
+        tickerId <- 1
+        while (start < end) {
+            ## end <- as.POSIXct("2020-02-20 16:00:00", tz = "UTC")
+
+            end <- format(end, "%Y%m%d %H:%M:%S")
+
+            ic$reqHistoricalData(tickerId,
+                                 contract,
+                                 endDateTime = end,
+                                 durationStr = durationStr,
+                                 barSizeSetting = barSize,
                                  whatToShow = whatToShow,
-                                 verbose = FALSE,
-                                 tickerId = "1")
-        close(tws)
+                                 useRTH = useRTH,
+                                 formatDate = "2",
+                                 keepUpToDate = FALSE)
 
-        if (is.null(res)) {
-            times <- as.integer(c(unclass(t)))
-            if (verbose)
-                message("request data up to ",
-                        .POSIXct(max(times)),
-                        ", but received no data")
-            fn0 <- fill_in(filename,
-                           id = id,
-                           start = c(unclass(t)),
-                           end = c(unclass(t)),
-                           delim = c("%", "%"))
-            fn <- file.path(directory, fn0)
-            file.create(fn)
-        } else {
-            res <- as.zoo(res)
-            times <- as.integer(
-                c(unclass(index(res)))) ## make POSIXct numeric
-                                        ## and strip 'tz'
-            if (verbose)
-                message("request data up to ", t,
-                        ", received data from ", .POSIXct(min(times)),
-                        " [", weekdays(.POSIXct(min(times)), TRUE), "]",
-                        " to ",                .POSIXct(max(times)),
-                        " [", weekdays(.POSIXct(max(times)), TRUE), "]")
-
-            data <- as.data.frame(as.matrix(res))
-
-            if (trim) {
-                ii <- index(res) >= start & index(res) <= end
-                times <- times[ii]
-                data <- data[ii, , drop = FALSE]
+            while (!ic$checkMsg(timeout = wait)) {
+                ## nrow(wrap$context$historical)
+                Sys.sleep(0.1)
             }
+            h0 <- wrap$context$historical
+            if (accumulate && !is.null(H$time))
+                h0 <- h0[h0$time < min(H$time), ]
 
             if (whatToShow == "TRADES") {
-                data <- data[ , -7L, drop = FALSE]
                 cnames <- c("timestamp", "open", "high", "low", "close",
                             "volume", "vwap", "count")
             } else if (whatToShow == "MIDPOINT" ||
                        whatToShow == "BID" ||
                        whatToShow == "ASK" ) {
-                data <- data[ , 1:4, drop = FALSE]
+                h0 <- h0[ , 1:5, drop = FALSE]
                 cnames <- c("timestamp", "open", "high", "low", "close")
             } else
                 stop("unknown ibpricetype")
 
-            data <- cbind(times, data)
-            colnames(data) <- cnames
+            h0[[1L]] <- as.numeric(h0[[1L]])
+            h0 <- as.matrix(h0)
 
-            if (accumulate) {
-                all_data <- if (is.null(all_data))
-                                data
-                            else
-                                rbind(all_data,
-                                      data[!(data$timestamp %in% all_data$timestamp), ])
-            }
+            colnames(h0) <- cnames
 
             fn0 <- fill_in(filename,
                            id = id,
-                           start = min(times),
-                           end = max(times),
+                           start = min(h0[, 1L]),
+                           end   = max(h0[, 1L]),
                            delim = c("%", "%"))
 
             fn <- file.path(directory, fn0)
+            all_files <- c(all_files, fn)
 
-            write.table(data, sep = sep,
+            write.table(h0,
+                        sep = sep,
                         row.names = FALSE,
                         col.names = TRUE,
                         file = fn)
+            if (accumulate)
+                H <- rbind(h0, H)
 
+            end <- .POSIXct(min(h0[, 1L]))
         }
-        all_files <- c(all_files, fn)
 
-        if (.POSIXct(max(times)) >= end)
-            break
-
-        Sys.sleep(10L)
+        if (accumulate) {
+            H$time <- .POSIXct(as.numeric(H$time))
+            H
+        } else {
+            all_files
+        }
+        Sys.sleep(4)
     }
-    if (accumulate)
-        all_data
-    else
-        all_files
 }
-
-
 
 combine_files <- function(directory,
                           max.rows = -1,
