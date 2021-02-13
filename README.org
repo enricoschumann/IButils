@@ -1,7 +1,7 @@
 * IButils -- Utility Functions for the Interactive Brokers API
 
   Utility functions for the Interactive Brokers API,
-  based on packages [[https://cran.r-project.org/package=IBrokers][IBrokers]] and [[<https://github.com/lbilli/rib>][rib]]. 
+  based on packages [[https://cran.r-project.org/package=IBrokers][IBrokers]] and [[https://github.com/lbilli/rib][rib]]. 
 
 ** Installing the package
 
