@@ -39,7 +39,13 @@ ib_hist_data <- function(Symbol,
         }
     }
 
-
+    do.wait <- FALSE
+    if (grepl("secs", barSize)) {
+        ## https://interactivebrokers.github.io/tws-api/historical_limitations.html
+        ## 1 secs , 5 secs , 10 secs , 15 secs , 30 secs
+        do.wait <- TRUE
+    }
+    
 
     if (is.null(backend) ||
         tolower(backend) == "ibrokers") {
@@ -178,7 +184,8 @@ ib_hist_data <- function(Symbol,
             if (.POSIXct(max(times)) >= end)
                 break
 
-            Sys.sleep(10L)
+            if (do.wait)
+                Sys.sleep(10L)
         }
         if (accumulate)
             all_data
@@ -192,6 +199,8 @@ ib_hist_data <- function(Symbol,
                                     secType  = Security_Type,
                                     exchange = Exchange,
                                     currency = Currency)
+
+        contract$includeExpired <- TRUE
 
         H <- NULL
         wrap <- rib::IBWrapSimple$new()
@@ -225,8 +234,8 @@ ib_hist_data <- function(Symbol,
                 Sys.sleep(0.1)
             }
             h0 <- wrap$context$historical
-            if (accumulate && !is.null(H$time))
-                h0 <- h0[h0$time < min(H$time), ]
+            if (accumulate && !is.null(H[, "timestamp"]))
+                h0 <- h0[h0$time < min(H[, "timestamp"]), ]
 
             if (whatToShow == "TRADES") {
                 cnames <- c("timestamp", "open", "high", "low", "close",
@@ -262,15 +271,20 @@ ib_hist_data <- function(Symbol,
                 H <- rbind(h0, H)
 
             end <- .POSIXct(min(h0[, 1L]))
+            if (do.wait)
+                Sys.sleep(10L)
+
         }
 
         if (accumulate) {
-            H$time <- .POSIXct(as.numeric(H$time))
+            ## H$time <- .POSIXct(as.numeric(H[, "timestamp"]))
+            if (trim) {
+                
+            }
             H
         } else {
             all_files
         }
-        Sys.sleep(4)
     }
 }
 
