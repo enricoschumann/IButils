@@ -45,7 +45,7 @@ ib_hist_data <- function(Symbol,
         ## 1 secs , 5 secs , 10 secs , 15 secs , 30 secs
         do.wait <- TRUE
     }
-    
+
 
     if (is.null(backend) ||
         tolower(backend) == "ibrokers") {
@@ -203,7 +203,7 @@ ib_hist_data <- function(Symbol,
         contract$includeExpired <- TRUE
 
         H <- NULL
-        wrap <- rib::IBWrapSimple$new()
+        wrap <- IBWrapHistData$new()
         ic <- rib::IBClient$new(wrap)
         cid <- if (is.null(clientId))
                    sample(1e8, size = 1) else clientId
@@ -214,6 +214,19 @@ ib_hist_data <- function(Symbol,
         ic$checkMsg(timeout = wait)
 
         tickerId <- 1
+        ic$reqHeadTimestamp(tickerId = tickerId,
+                            contract = contract,
+                            whatToShow = whatToShow,
+                            useRTH = useRTH,
+                            formatDate = "2")
+        while (!ic$checkMsg(timeout = wait)) {
+            Sys.sleep(0.1)
+        }
+        earliest <- as.numeric(wrap$context$headTimestamp)
+        if (is.null(start))
+            start <- earliest
+
+        message("Data available back to ", as.character(.POSIXct(earliest)))
         while (start < end) {
             ## end <- as.POSIXct("2020-02-20 16:00:00", tz = "UTC")
 
@@ -230,7 +243,6 @@ ib_hist_data <- function(Symbol,
                                  keepUpToDate = FALSE)
 
             while (!ic$checkMsg(timeout = wait)) {
-                ## nrow(wrap$context$historical)
                 Sys.sleep(0.1)
             }
             h0 <- wrap$context$historical
@@ -250,7 +262,6 @@ ib_hist_data <- function(Symbol,
 
             h0[[1L]] <- as.numeric(h0[[1L]])
             h0 <- as.matrix(h0)
-
             colnames(h0) <- cnames
 
             fn0 <- fill_in(filename,
@@ -271,6 +282,11 @@ ib_hist_data <- function(Symbol,
                 H <- rbind(h0, H)
 
             end <- .POSIXct(min(h0[, 1L]))
+            message("==> received data back to ", as.character(end))
+
+            if (min(h0[, 1L]) <= earliest)
+                break
+
             if (do.wait)
                 Sys.sleep(10L)
 
@@ -279,7 +295,7 @@ ib_hist_data <- function(Symbol,
         if (accumulate) {
             ## H$time <- .POSIXct(as.numeric(H[, "timestamp"]))
             if (trim) {
-                
+
             }
             H
         } else {

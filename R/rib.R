@@ -95,6 +95,8 @@ IBWrap.IButils <-
 
 
         error = function(id, errorCode, errorString) {
+            if (errorCode == 2104)
+                        cat(errorString, "\n")
             cat(id, errorCode, errorString, "\n")
         },
 
@@ -188,7 +190,7 @@ positions <- function(port = 7496, clientId = 1) {
     }
 
     ic$cancelPositions()
-    
+
     account <- unlist(lapply(wrap$Data$positions, `[[`, "account"))
 
     contract <- lapply(wrap$Data$positions, `[[`, "contract")

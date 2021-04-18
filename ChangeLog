@@ -1,14 +1,23 @@
+2021-04-18  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib_wrap.R: add custom wrapper for
+        historical data
+
+        * R/ib_hist_data.R (ib_hist_data): with backend
+        "rib": if 'start' is NULL, set it to the
+        result of 'reqHeadTimestamp'
+
 2021-02-12  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R (ib_hist_data): add
-	arguments 'backend' and 'clientId'
+        * R/ib_hist_data.R (ib_hist_data): add
+        arguments 'backend' and 'clientId'
 
 2020-05-09  Enrico Schumann  <es@enricoschumann.net>
 
         * DESCRIPTION (Version): 0.2-1
 
         * R/rib.R (executions): fix function when there
-	are no executions
+        are no executions
 
 2020-04-29  Enrico Schumann  <es@enricoschumann.net>
 
