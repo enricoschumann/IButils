@@ -10,9 +10,13 @@
 ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
              directory, barSize, durationStr = NULL, whatToShow,
              start = as.POSIXct(Sys.Date() - 30), end = Sys.time(),
+             useRTH = FALSE,
              skip.from, skip.until, skip.tz = "",
              verbose = TRUE, trim = TRUE, accumulate = FALSE,
-             port = 7496, sep = ",", filename = "\%id\%_\%start\%_\%end\%")
+             port = 7496, sep = ",",
+             filename = "\%id\%_\%start\%_\%end\%",
+             backend = NULL,
+             clientId = NULL)
 }
 \arguments{
   \item{Symbol}{
@@ -51,6 +55,9 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   \item{end}{
     POSIXct
 }
+  \item{useRTH}{
+    logical
+}
   \item{skip.from}{
     character
 }
@@ -75,15 +82,31 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   \item{port}{
     the TWS port
   }
-  \item{filename}{
 
-    character: pattern for the filenames of the stored files. May
-    include special patterns such as \sQuote{\code{\%id\%}}.
+  \item{clientId}{either \code{NULL} or an
+    integer. Specifying an integer is supported only
+    for backend \code{rib}. If \code{NULL}, a random id
+    is chosen.  }
 
+  \item{filename}{character: pattern for the filenames
+    of the stored files. May include special patterns
+    such as \sQuote{\code{\%id\%}}.
   }
+
+  \item{backend}{a lowercase string or
+    \code{NULL}. Supported are \code{ibrokers} or
+    \code{rib}. Default is \code{NULL}, which
+    translates into \code{ibrokers}.}
+
 }
 \details{
   See IB API documentation \url{https://interactivebrokers.github.io/}
+
+  The package uses functionality of either package \pkg{IBrokers}
+  or \pkg{rib}, depending on the setting of backend.
+
+
+
 }
 \value{
   A character vector: the names of the file (including the directory)
