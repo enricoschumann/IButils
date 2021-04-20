@@ -28,7 +28,14 @@ ib_hist_data <- function(Symbol,
 
     if (is.null(id))
         id <- paste0(Symbol, Security_Type, Exchange, Currency, collapse = "-")
-
+    
+    if (barSize == "5 min") {
+        if (verbose)
+            message("NOTE 'barSize' changed from '", barSize, "' to 5 mins")
+        barSize <- "5 mins"
+    }
+        
+    
     if (is.null(durationStr)) {
         if (barSize  == "1 min") {
             durationStr <- "3 D"
@@ -328,6 +335,7 @@ combine_files <- function(directory,
     }
     symbols <- gsub("(.*)_[0-9]+_[0-9]+$", "\\1", filenames)
     symbols <- sort(unique(symbols))
+    alldata <- NULL
 
     for (s in symbols) {
         alldata <- NULL
@@ -366,8 +374,12 @@ combine_files <- function(directory,
             message(" ... OK")
         if (verbose)
             message("===> rename files", appendLF = FALSE)
-        if (prefix != "")
-            file.rename(files, paste0(prefix, files))
+        if (prefix != "") {
+            if (outfile %in% files)
+                files <- setdiff(files, outfile)
+            if (length(files))
+                file.rename(files, paste0(prefix, files))
+        }
         if (verbose)
             message(" ... OK")
     }

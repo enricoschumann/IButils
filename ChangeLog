@@ -1,3 +1,13 @@
+2021-04-20  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/ib_hist_data.R (combine_files): skip prefix
+        if there is a single input file
+
+2021-04-19  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/ib_hist_data.R (combine_files): when there
+        are no files, the function now returns NULL
+
 2021-04-18  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib_wrap.R: add custom wrapper for
