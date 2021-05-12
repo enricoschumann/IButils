@@ -28,14 +28,14 @@ ib_hist_data <- function(Symbol,
 
     if (is.null(id))
         id <- paste0(Symbol, Security_Type, Exchange, Currency, collapse = "-")
-    
+
     if (barSize == "5 min") {
         if (verbose)
             message("NOTE 'barSize' changed from '", barSize, "' to 5 mins")
         barSize <- "5 mins"
     }
-        
-    
+
+
     if (is.null(durationStr)) {
         if (barSize  == "1 min") {
             durationStr <- "3 D"
@@ -43,6 +43,9 @@ ib_hist_data <- function(Symbol,
             durationStr <- "5 D"
         } else if (barSize  == "1 secs") {
             durationStr <- "2000 S"
+        } else {
+            if (is.null(durationStr))
+                stop("duration not specified")
         }
     }
 
@@ -202,12 +205,15 @@ ib_hist_data <- function(Symbol,
 
     } else if (tolower(backend) == "rib") {
 
-        contract <- rib::IBContract(localSymbol = Symbol,
-                                    secType  = Security_Type,
-                                    exchange = Exchange,
-                                    currency = Currency)
+        if (is.list(Symbol))
+            contract <- Symbol
+        else
+            contract <- rib::IBContract(localSymbol = Symbol,
+                                        secType  = Security_Type,
+                                        exchange = Exchange,
+                                        currency = Currency)
 
-        contract$includeExpired <- TRUE
+        contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
 
         H <- NULL
         wrap <- IBWrapHistData$new()

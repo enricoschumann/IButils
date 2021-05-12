@@ -335,15 +335,26 @@ contract_details <- function(localSymbol,
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
 
-    wrap <- IBWrap.IButils$new()
+    wrap <- IBWrapHistData$new()
     ic   <- rib::IBClient$new(wrap)
 
     capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
-
     capture.output(ic$checkMsg())
-    ic$reqPositions()
-
+    
+    if (is.list(localSymbol))
+        contract <- localSymbol
+    else
+        contract <- rib::IBContract(localSymbol = localSymbol,
+                                    secType  = secType,
+                                    exchange = exchange,
+                                    currency = currency)
+    
+    contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
+    ic$reqContractDetails(1, contract = contract)
+    ic$checkMsg()
+    ans <- wrap$Data$contract
+    ans
 
 }
 

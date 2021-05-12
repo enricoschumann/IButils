@@ -10,6 +10,7 @@ IBWrapHistData <- R6::R6Class("IBWrapHistData",
 
     # Environment holding results
     context= NULL,
+    Data= NULL,
 
     initialize= function() self$context <- new.env(),
 
@@ -56,13 +57,13 @@ IBWrapHistData <- R6::R6Class("IBWrapHistData",
                           self$context$nextId <- orderId,
 
     contractDetails=    function(reqId, contractDetails)
-                          self$context$contract <- contractDetails,
+                          self$Data$contract <- contractDetails,
 
     bondContractDetails=function(reqId, contractDetails)
                           self$context$bond <- contractDetails,
 
     contractDetailsEnd= function(reqId)
-                          cat("ContractDetailsEnd:", reqId, "\n"),
+                          cat("Done ContractDetailsEnd:", reqId, "\n"),
 
     execDetails=        function(reqId, contract, execution) {
                           self$context$ex_contract <- contract
