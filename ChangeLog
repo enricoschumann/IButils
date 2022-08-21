@@ -1,3 +1,7 @@
+2022-08-21  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/read_flex_report.R: add function
+
 2021-05-12  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.R (contract_details): return list of

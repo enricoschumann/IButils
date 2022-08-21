@@ -1,5 +1,6 @@
 \name{flex_web_service}
 \alias{flex_web_service}
+\alias{read_flex_report}
 \title{
   Flex Web Service
 }
@@ -8,6 +9,9 @@
 }
 \usage{
 flex_web_service(file, token, query, version = 3, delay = 2,
+                 no.write.msg = TRUE, no.write.warn = TRUE,
+                 verbose = TRUE)
+read_flex_report(file, token, query, version = 3, delay = 2,
                  no.write.msg = TRUE, no.write.warn = TRUE,
                  verbose = TRUE)
 }
@@ -93,5 +97,9 @@ flex_web_service(file, token, query, version = 3, delay = 2,
 flex_web_service(file = "~/my_files/my_report.csv",
                  token = "12345678901234567890", ## character!
                  query = 123)
+
+file <- "~/Downloads/Net_Asset_Value_NAV_in_Base"
+ans <- read_flex_report(file)
+
 }
 }
