@@ -1,16 +1,17 @@
 export(
     ib_hist_data,
     combine_files,
-    latest_timestamp,
     flex_web_service,
+    latest_timestamp,
+    read_flex_report,
 
     positions,
     order_status,
     executions,
     contract_details
     )
-    
-       
+
+
 importFrom("IBrokers", "reqHistoricalData")
 importFrom("IBrokers", "twsConnect")
 importFrom("IBrokers", "twsContract")

@@ -1,6 +1,5 @@
 \name{flex_web_service}
 \alias{flex_web_service}
-\alias{read_flex_report}
 \title{
   Flex Web Service
 }
@@ -9,9 +8,6 @@
 }
 \usage{
 flex_web_service(file, token, query, version = 3, delay = 2,
-                 no.write.msg = TRUE, no.write.warn = TRUE,
-                 verbose = TRUE)
-read_flex_report(file, token, query, version = 3, delay = 2,
                  no.write.msg = TRUE, no.write.warn = TRUE,
                  verbose = TRUE)
 }
@@ -52,7 +48,7 @@ read_flex_report(file, token, query, version = 3, delay = 2,
   The function also checks whether the downloaded file
   contains messages from IB (lines that start with
   \dQuote{\code{MSG}}).
-  
+
 }
 \value{
 
@@ -80,7 +76,7 @@ read_flex_report(file, token, query, version = 3, delay = 2,
   \code{no.write.msg} and \code{no.write.warn} are set
   to \code{FALSE}; both arguments default to
   \code{TRUE.}
-  
+
 
 }
 \references{
