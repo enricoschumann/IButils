@@ -1,5 +1,13 @@
 2022-08-28  Enrico Schumann  <es@enricoschumann.net>
 
+        * R/rib_wrap.R: update signature of "error" for
+        rib version 0.16.0
+
+        * R/ib_hist_data.R (ib_hist_data): stop if
+        'directory' does not exist;
+        (ib_hist_data): argument 'filename' may contain
+        "%whatToShow%"
+
         * NAMESPACE: export "read_flex_report"
 
 2022-08-21  Enrico Schumann  <es@enricoschumann.net>

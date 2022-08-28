@@ -22,6 +22,9 @@ ib_hist_data <- function(Symbol,
                          backend = NULL,
                          clientId = NULL) {
 
+    if (!dir.exists(directory))
+        stop(sQuote("directory"), " does not exist")
+
     all_files <- NULL
     if (end < start)
         stop("end < start")
@@ -129,6 +132,7 @@ ib_hist_data <- function(Symbol,
                                id = id,
                                start = c(unclass(t)),
                                end = c(unclass(t)),
+                               whatToShow = whatToShow,
                                delim = c("%", "%"))
                 fn <- file.path(directory, fn0)
                 file.create(fn)
@@ -179,8 +183,8 @@ ib_hist_data <- function(Symbol,
                                id = id,
                                start = min(times),
                                end = max(times),
+                               whatToShow = whatToShow,
                                delim = c("%", "%"))
-
                 fn <- file.path(directory, fn0)
 
                 write.table(data, sep = sep,
@@ -281,6 +285,8 @@ ib_hist_data <- function(Symbol,
                            id = id,
                            start = min(h0[, 1L]),
                            end   = max(h0[, 1L]),
+                           whatToShow = whatToShow,
+
                            delim = c("%", "%"))
 
             fn <- file.path(directory, fn0)

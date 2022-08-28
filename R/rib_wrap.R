@@ -74,7 +74,7 @@ IBWrapHistData <- R6::R6Class("IBWrapHistData",
     execDetailsEnd=     function(reqId)
                           cat("ExecDetailsEnd:", reqId, "\n"),
 
-    error=              function(id, errorCode, errorString) {
+    error=              function(id, errorCode, errorString, advancedOrderRejectJson) {
       switch(as.character(errorCode),
              "200" = stop("No security definition has been found for the request"),
              "2104" = NULL,  ## Market data OK
