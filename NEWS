@@ -1,11 +1,13 @@
-v0.3-0  (2021-??-??; not released yet)
+v0.3-0  (2022-??-??; not released yet)
 
   o ib_hist_data: new argument 'backend', which can be
     set to 'rib' for using package 'rib'
     [ https://github.com/lbilli/rib ]
 
+  o new function 'contract_details'
+
   o new function 'read_flex_report'
-  
+
   o ...
 
 v0.2-1  (2020-05-09)

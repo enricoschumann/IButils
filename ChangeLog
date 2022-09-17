@@ -1,3 +1,11 @@
+2022-09-17  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib.R (contract_details): capture messages and
+        attach as attribute "messages"
+
+        * R/rib_wrap.R (wrap0): add new "wrap0", to become
+        default wrap for all functions
+
 2022-08-28  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib_wrap.R: update signature of "error" for
