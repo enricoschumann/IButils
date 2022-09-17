@@ -1,5 +1,12 @@
 2022-09-17  Enrico Schumann  <es@enricoschumann.net>
 
+        * Scripts/message_codes.R: add script for scraping
+        messages
+
+        * data/message_codes.txt: add table of messages;
+        provide within package as data.frame
+        "message_codes"
+
         * R/rib.R (contract_details): capture messages and
         attach as attribute "messages"
 

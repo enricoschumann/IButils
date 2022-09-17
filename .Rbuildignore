@@ -10,3 +10,5 @@ dev/
 GBPUSD_crash.png
 TWS_Contract_Detail.png
 x.RData
+Scripts/
+data/message_codes.txt
