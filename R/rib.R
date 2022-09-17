@@ -94,7 +94,7 @@ IBWrap.IButils <-
                      },
 
 
-        error = function(id, errorCode, errorString) {
+        error = function(id, errorCode, errorString, advancedOrderRejectJson) {
             if (errorCode == 2104)
                         cat(errorString, "\n")
             cat(id, errorCode, errorString, "\n")
@@ -335,12 +335,12 @@ contract_details <- function(localSymbol,
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
 
-    wrap <- IBWrapHistData$new()
+    wrap <- wrap0$new()
     ic   <- rib::IBClient$new(wrap)
 
-    capture.output(ic$connect(port = port, clientId = clientId))
+    msg1 <- capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
-    capture.output(ic$checkMsg())
+    msg2 <- capture.output(n <- ic$checkMsg())
     
     if (is.list(localSymbol))
         contract <- localSymbol
@@ -352,10 +352,10 @@ contract_details <- function(localSymbol,
     
     contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
     ic$reqContractDetails(1, contract = contract)
-    ic$checkMsg()
-    ans <- wrap$Data$contract
+    msg3 <- capture.output(n <- ic$checkMsg())
+    ans <- wrap$Data$contract[[1]]
+    attr(ans, "messages") <- c(msg1, msg2, msg3)
     ans
-
 }
 
 ib_hist_data2 <- function(contract,
