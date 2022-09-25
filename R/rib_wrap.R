@@ -1,14 +1,19 @@
 wrap0 <- R6::R6Class("IBWrap",
 
-  class=      FALSE,
-  cloneable=  FALSE,
-  lock_class= TRUE,
+    class=      FALSE,
+    cloneable=  FALSE,
+    lock_class= TRUE,
 
-  public= list(
+    public= list(
 
-      Data= NULL,
+        Data= NULL,
 
-      initialize= function() self$Data <- new.env(),
+        initialize= function() {
+            self$Data <- new.env()
+            self$Data$executions <- list()
+            self$Data$positions <- list()
+
+        },
 
     # Callbacks
     tickPrice= function(tickerId, field, price, size, attrib) warning("default method for ", get("res", envir = parent.frame(1))$fname),
@@ -23,11 +28,22 @@ wrap0 <- R6::R6Class("IBWrap",
 
     tickEFP= function(tickerId, tickType, basisPoints, formattedBasisPoints, totalDividends, holdDays, futureLastTradeDate, dividendImpact, dividendsToLastTradeDate) warning("default method for ", get("res", envir = parent.frame(1))$fname),
 
-    orderStatus= function(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice) warning("default method for ", get("res", envir = parent.frame(1))$fname),
+    orderStatus= function(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice) {
+        self$Data$order_status[[as.character(permId)]] <-
+            as.list(match.call())[-1L]
+    },
 
-    openOrder= function(orderId, contract, order, orderstate) warning("default method for ", get("res", envir = parent.frame(1))$fname),
+    openOrder= function(orderId, contract, order, orderstate) {
+        self$Data$orders[[as.character(order$permId)]] <-
+            list(orderId = orderId,
+                 contract = contract,
+                 order = order,
+                 orderstate = orderstate)
+    },
 
-    openOrderEnd= function() warning("default method for ", get("res", envir = parent.frame(1))$fname),
+    openOrderEnd= function() {
+        cat(length(self$Data$orders), " orders found\n")
+    },
 
 #    connectionClosed= function() warning("default method for ", get("res", envir = parent.frame(1))$fname),
 
@@ -63,9 +79,8 @@ wrap0 <- R6::R6Class("IBWrap",
     execDetailsEnd= function(reqId) warning("default method for ", get("res", envir = parent.frame(1))$fname),
 
     error= function(id, errorCode, errorString, advancedOrderRejectJson) {
-      cat(format(errorCode, width = 6), "|  ", "\n")
-      ## warning("default method for ", get("res", envir = parent.frame(1))$fname)
-  },
+        cat(format(errorCode, width = 6), "|  ", errorString, "\n")
+    },
 
     updateMktDepth= function(id, position, operation, side, price, size) warning("default method for ", get("res", envir = parent.frame(1))$fname),
 

@@ -11,15 +11,16 @@ orders <- function(account = "",
                    lmtPrice,
                    uuid = TRUE) {
 
-    ## creates a data.frame of orders
     res <- data.frame(account,
                       instrument,
                       localSymbol,
                       secType,
                       exchange,
                       currency,
-                      amount,
+                      amount = abs(amount),
+                      action,
                       type,
+                      lmtPrice,
                       uuid = NA_character_,
                       stringsAsFactors = FALSE)
     if (isTRUE(uuid))
@@ -31,20 +32,86 @@ orders <- function(account = "",
     res
 }
 
-write_orders <- function(dir, ...) {
+write_orders <- function(orders, dir, ...) {
     ## takes a data.frame of orders
     ## and writes to single files
 
+    for (i in seq_len(nrow(orders)))
+        write.table(orders[i, ], sep = ",",
+                    row.names = FALSE,
+                    col.names = TRUE,
+                    file = file.path(dir, orders[i, "uuid"]))
+
 }
 
-read_orders <- function(dir, ...) {
+read_orders <- function(dir, pattern = NULL, ...) {
     ## read single files into data.frame
-
+    fs <- list.files(dir, full.names = TRUE)
+    res <- vector("list", length(fs))
+    for (f in fs)
+        res[[f]] <- read.table(f, header = TRUE, sep = ",")
+    res <- do.call(rbind, res)
+    class(res) <- c("ib_orders", "data.frame")
+    res
 }
 
-send_orders <- function(dir, sent.dir, ...) {
-    ##
+send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
 
+    fs <- list.files(dir, full.names = TRUE,
+                     pattern = "[^~]$")
+
+    wrap <- IButils:::wrap0$new()
+    ic   <- rib::IBClient$new(wrap)
+
+    ic$connect(port=7496, clientId=1)
+    capture.output(ic$checkMsg())
+    on.exit(ic$disconnect())
+
+    if (is.null(wrap$Data$nextId)) {
+        ic$reqIds()
+        ic$checkMsg()
+    }
+
+    for (f in fs) {
+        o <- read.table(f, header = TRUE, sep = ",")
+        ic$reqIds()
+        ic$checkMsg()
+        orderId <- wrap$Data$nextId
+
+        contract <- rib::Contract
+        contract$localSymbol <- o$localSymbol
+        contract$exchange <- o$exchange
+        contract$currency <- o$currency
+        contract$secType <- o$secType
+
+        order <- rib::Order
+        order$action <- if (o$amount > 1) "BUY" else "SELL"
+        order$totalQuantity <- o$amount
+        order$orderRef <- o$uuid
+        order$account <- o$account
+
+        if (o$type == "LMT") {
+            order$orderType <- "LMT"
+            order$lmtPrice <- o$lmtPrice
+        } else {
+            order$orderType <- "MKT"
+        }
+
+
+        ic$placeOrder(orderId, contract, order)
+        res <- ic$checkMsg()
+        copied <- file.copy(f, sent.dir)
+        if (copied)
+            file.remove(f)
+        else
+            stop("could not move file ", f)
+    }
+    invisible(NULL)
+    ## for (i in seq_len(nrow(orders))) {
+    ##     write.table(orders[i, ], sep = ",",
+    ##                 file = file.path(dir, orders$uuid[i]),
+    ##                 row.names = FALSE, quote = TRUE)
+    ## }
 }
 
 update_orders <- function(dir, ...) {
@@ -293,38 +360,38 @@ executions <- function(port = 7496, clientId = 1) {
         ex
 }
 
-send_orders <- function(orders, port = 7496, clientId = 1) {
+## send_orders <- function(orders, port = 7496, clientId = 1) {
 
-    if (!requireNamespace("rib"))
-        stop("package ", sQuote("rib"), " is not available")
+##     if (!requireNamespace("rib"))
+##         stop("package ", sQuote("rib"), " is not available")
 
-    wrap <- IBWrap.IButils$new()
-    ic   <- rib::IBClient$new(wrap)
+##     wrap <- IBWrap.IButils$new()
+##     ic   <- rib::IBClient$new(wrap)
 
-    capture.output(ic$connect(port = port, clientId = clientId))
-    on.exit(ic$disconnect())
-    capture.output(ic$checkMsg())
+##     capture.output(ic$connect(port = port, clientId = clientId))
+##     on.exit(ic$disconnect())
+##     capture.output(ic$checkMsg())
 
-    ## --------------
+##     ## --------------
 
-    contract <- rib::Contract
-    contract$localSymbol <- "FGBL JUN 20"
-    contract$exchange <- "DTB"
-    contract$currency <- "EUR"
-    contract$secType <- "FUT"
+##     contract <- rib::Contract
+##     contract$localSymbol <- "FGBL JUN 20"
+##     contract$exchange <- "DTB"
+##     contract$currency <- "EUR"
+##     contract$secType <- "FUT"
 
-    order <- rib::Order
-    order$action <- "BUY"
-    order$totalQuantity <- 1
-    order$lmtPrice <- 169
-    order$orderType <- "LMT"
-    order$orderRef <- "Test1"
+##     order <- rib::Order
+##     order$action <- "BUY"
+##     order$totalQuantity <- 1
+##     order$lmtPrice <- 169
+##     order$orderType <- "LMT"
+##     order$orderRef <- "Test1"
 
-    ic$placeOrder(id = wrap$Data$nextId, contract = contract, order)
-    capture.output(ic$checkMsg())
+##     ic$placeOrder(id = wrap$Data$nextId, contract = contract, order)
+##     capture.output(ic$checkMsg())
 
 
-}
+## }
 
 contract_details <- function(localSymbol,
                              secType,
@@ -341,7 +408,7 @@ contract_details <- function(localSymbol,
     msg1 <- capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
     msg2 <- capture.output(n <- ic$checkMsg())
-    
+
     if (is.list(localSymbol))
         contract <- localSymbol
     else
@@ -349,7 +416,7 @@ contract_details <- function(localSymbol,
                                     secType  = secType,
                                     exchange = exchange,
                                     currency = currency)
-    
+
     contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
     ic$reqContractDetails(1, contract = contract)
     msg3 <- capture.output(n <- ic$checkMsg())
