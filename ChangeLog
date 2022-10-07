@@ -1,8 +1,15 @@
+2022-10-07  Enrico Schumann  <es@enricoschumann.net>
+
+        * DESCRIPTION (Version): 0.3-0
+
+        * Scripts/message_codes.R: fix variable names
+        in script
+
 2022-09-25  Enrico Schumann  <es@enricoschumann.net>
 
-        * R/rib.R (read_orders, write_orders,send_orders):
-	experimental: add function definitions, taken from
-	branch topic/orders; not exported yet
+        * R/rib.R (read_orders,write_orders,send_orders):
+        experimental: add function definitions, taken from
+        branch topic/orders; not exported yet
 
 2022-09-17  Enrico Schumann  <es@enricoschumann.net>
 

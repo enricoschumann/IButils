@@ -2,7 +2,7 @@ u <- "https://interactivebrokers.github.io/tws-api/message_codes.html"
 raw <- readLines(u, encoding = "utf-8")
 
 rows <- paste(raw, collapse = "")
-rows <- regmatches(txt, gregexec("<tr>.*?</tr>", txt))
+rows <- regmatches(rows, gregexec("<tr>.*?</tr>", rows))
 
 messages <- rows[[1]][grep("<td>[0-9]+", rows[[1]])]
 cols <- strsplit(messages, "</td><td>")

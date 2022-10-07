@@ -1,4 +1,7 @@
-v0.3-0  (2022-??-??; not released yet)
+v0.3-0  (2022-10-07)
+
+  o maintenance release, primarily to accommodate changes
+    in the API. For all changes, see the ChangeLog.
 
   o ib_hist_data: new argument 'backend', which can be
     set to 'rib' for using package 'rib'
@@ -8,7 +11,8 @@ v0.3-0  (2022-??-??; not released yet)
 
   o new function 'read_flex_report'
 
-  o ...
+  o new dataset "message_codes": a data.frame of
+    documented message codes
 
 v0.2-1  (2020-05-09)
 

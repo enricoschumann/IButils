@@ -60,7 +60,7 @@ send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
     fs <- list.files(dir, full.names = TRUE,
                      pattern = "[^~]$")
 
-    wrap <- IButils:::wrap0$new()
+    wrap <- wrap0$new()
     ic   <- rib::IBClient$new(wrap)
 
     ic$connect(port=7496, clientId=1)

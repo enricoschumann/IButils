@@ -12,7 +12,7 @@ wrap0 <- R6::R6Class("IBWrap",
             self$Data <- new.env()
             self$Data$executions <- list()
             self$Data$positions <- list()
-
+            self$Data$order_status <- list()
         },
 
     # Callbacks
@@ -89,7 +89,7 @@ wrap0 <- R6::R6Class("IBWrap",
     updateNewsBulletin= function(msgId, msgType, newsMessage, originExch) warning("default method for ", get("res", envir = parent.frame(1))$fname),
 
     managedAccounts= function(accountsList) {
-      cat("Access to the following accounts: \n")
+      cat("Accounts: \n")
       acc <- paste(paste("  ", sort(unlist(strsplit(accountsList, ",")))),
                    collapse = "\n")
       cat(acc, "\n\n")
