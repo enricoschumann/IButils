@@ -64,18 +64,18 @@ send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
     ic   <- rib::IBClient$new(wrap)
 
     ic$connect(port=7496, clientId=1)
-    capture.output(ic$checkMsg())
+    capture.output(ic$checkMsg(wrap))
     on.exit(ic$disconnect())
 
     if (is.null(wrap$Data$nextId)) {
         ic$reqIds()
-        ic$checkMsg()
+        ic$checkMsg(wrap)
     }
 
     for (f in fs) {
         o <- read.table(f, header = TRUE, sep = ",")
         ic$reqIds()
-        ic$checkMsg()
+        ic$checkMsg(wrap)
         orderId <- wrap$Data$nextId
 
         contract <- rib::Contract
@@ -99,7 +99,7 @@ send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
 
 
         ic$placeOrder(orderId, contract, order)
-        res <- ic$checkMsg()
+        res <- ic$checkMsg(wrap)
         copied <- file.copy(f, sent.dir)
         if (copied)
             file.remove(f)
@@ -237,41 +237,40 @@ positions <- function(port = 7496, clientId = 1) {
 
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
-
-    wrap <- IBWrap.IButils$new()
-    ic   <- rib::IBClient$new(wrap)
-
+    
+    wrap <- .wrap$new()
+    ic   <- rib::IBClient$new()
+    
     capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
-    capture.output(ic$checkMsg())
-
-    ## --------------
-
+    capture.output(ic$checkMsg(wrap))
+    
     ic$reqPositions()
-
+    
     done <- FALSE
     while (!done) {
-        count <- ic$checkMsg()
+        count <- ic$checkMsg(wrap)
         if (count == 0L)
             done <- TRUE
     }
-
+    
     ic$cancelPositions()
-
+    ic$checkMsg(wrap)
+    
     account <- unlist(lapply(wrap$Data$positions, `[[`, "account"))
-
+    
     contract <- lapply(wrap$Data$positions, `[[`, "contract")
     contract <- do.call(rbind, contract)
-
+    
     pos <- unlist(lapply(wrap$Data$positions, `[[`, "position"))
-
+    
     cost <- unlist(lapply(wrap$Data$positions, `[[`, "avgCost"))
-
+    
     ans <- cbind(account,
                  contract,
                  position = pos,
                  avg.cost = cost)
-    ans
+    as.data.frame(ans)
 }
 
 order_status <- function(port = 7496, clientId = 1) {
@@ -279,25 +278,25 @@ order_status <- function(port = 7496, clientId = 1) {
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
 
-    wrap <- IBWrap.IButils$new()
-    ic   <- rib::IBClient$new(wrap)
+    wrap <- .wrap$new()
+    ic   <- rib::IBClient$new()
 
     capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
-    capture.output(ic$checkMsg())
+    capture.output(ic$checkMsg(wrap))
 
     ## --------------
     ic$reqAllOpenOrders()
     done <- FALSE
     while (!done) {
-        count <- ic$checkMsg()
+        count <- ic$checkMsg(wrap)
         if (count == 0L)
             done <- TRUE
     }
 
     if (length(wrap$Data$orders)) {
         ans1 <- cbind(
-            do.call(rbind, wrap$Data$order_status)
+            do.call(rbind, wrap$Data$orderStatus)
         )
         ans2 <- cbind(
             do.call(rbind, lapply(wrap$Data$orders, `[[`, "orderId")),
@@ -336,18 +335,18 @@ executions <- function(port = 7496, clientId = 1) {
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
 
-    wrap <- IBWrap.IButils$new()
-    ic   <- rib::IBClient$new(wrap)
+    wrap <- .wrap$new()
+    ic   <- rib::IBClient$new()
 
     capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
-    capture.output(ic$checkMsg())
+    capture.output(ic$checkMsg(wrap))
 
     ## --------------
 
     ic$reqExecutions(1, filter = rib::ExecutionFilter)
 
-    ic$checkMsg()
+    ic$checkMsg(wrap)
     ex <- cbind(do.call(rbind, wrap$Data$executions))
     ex <- as.data.frame(ex, stringsAsFactors = FALSE)
     for (cc in seq_len(length(ex)))
@@ -356,8 +355,10 @@ executions <- function(port = 7496, clientId = 1) {
         ex$time <- as.POSIXct(ex$time, format = "%Y%m%d %H:%M:%S")
     if (!nrow(ex))
         invisible(NULL)
-    else
+    else {
+        attr(ex, "commissionReport") <- wrap$Data$commissionReport
         ex
+    }
 }
 
 ## send_orders <- function(orders, port = 7496, clientId = 1) {
@@ -370,7 +371,7 @@ executions <- function(port = 7496, clientId = 1) {
 
 ##     capture.output(ic$connect(port = port, clientId = clientId))
 ##     on.exit(ic$disconnect())
-##     capture.output(ic$checkMsg())
+##     capture.output(ic$checkMsg(wrap))
 
 ##     ## --------------
 
@@ -388,7 +389,7 @@ executions <- function(port = 7496, clientId = 1) {
 ##     order$orderRef <- "Test1"
 
 ##     ic$placeOrder(id = wrap$Data$nextId, contract = contract, order)
-##     capture.output(ic$checkMsg())
+##     capture.output(ic$checkMsg(wrap))
 
 
 ## }
@@ -403,11 +404,11 @@ contract_details <- function(localSymbol,
         stop("package ", sQuote("rib"), " is not available")
 
     wrap <- wrap0$new()
-    ic   <- rib::IBClient$new(wrap)
+    ic   <- rib::IBClient$new()
 
     msg1 <- capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
-    msg2 <- capture.output(n <- ic$checkMsg())
+    msg2 <- capture.output(n <- ic$checkMsg(wrap))
 
     if (is.list(localSymbol))
         contract <- localSymbol
@@ -419,7 +420,7 @@ contract_details <- function(localSymbol,
 
     contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
     ic$reqContractDetails(1, contract = contract)
-    msg3 <- capture.output(n <- ic$checkMsg())
+    msg3 <- capture.output(n <- ic$checkMsg(wrap))
     ans <- wrap$Data$contract[[1]]
     attr(ans, "messages") <- c(msg1, msg2, msg3)
     ans

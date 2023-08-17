@@ -221,14 +221,14 @@ ib_hist_data <- function(Symbol,
 
         H <- NULL
         wrap <- IBWrapHistData$new()
-        ic <- rib::IBClient$new(wrap)
+        ic <- rib::IBClient$new()
         cid <- if (is.null(clientId))
                    sample(1e8, size = 1) else clientId
         ic$connect(port = port, clientId = cid)
         on.exit(ic$disconnect())
 
         wait <- 0.2
-        ic$checkMsg(timeout = wait)
+        ic$checkMsg(wrap, timeout = wait)
 
         tickerId <- 1
         ic$reqHeadTimestamp(tickerId = tickerId,
@@ -236,7 +236,7 @@ ib_hist_data <- function(Symbol,
                             whatToShow = whatToShow,
                             useRTH = useRTH,
                             formatDate = "2")
-        while (!ic$checkMsg(timeout = wait)) {
+        while (!ic$checkMsg(wrap, timeout = wait)) {
             Sys.sleep(0.1)
         }
         earliest <- as.numeric(wrap$context$headTimestamp)
@@ -259,7 +259,7 @@ ib_hist_data <- function(Symbol,
                                  formatDate = "2",
                                  keepUpToDate = FALSE)
 
-            while (!ic$checkMsg(timeout = wait)) {
+            while (!ic$checkMsg(wrap, timeout = wait)) {
                 Sys.sleep(0.1)
             }
             h0 <- wrap$context$historical
@@ -314,7 +314,7 @@ ib_hist_data <- function(Symbol,
         if (accumulate) {
             ## H$time <- .POSIXct(as.numeric(H[, "timestamp"]))
             if (trim) {
-
+                browser()
             }
             H
         } else {

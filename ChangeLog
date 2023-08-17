@@ -1,3 +1,15 @@
+2023-08-17  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/ib_hist_data.R (ib_hist_data): update for latest
+        rib version
+
+        * R/rib.R (positions,order_status,executions): update for
+        latest rib version
+
+        * R/rib_wrap.R (.wrap): add new wrapper
+
+        * R/rib.R (executions): add attribute "commissionReport"
+
 2022-10-07  Enrico Schumann  <es@enricoschumann.net>
 
         * DESCRIPTION (Version): 0.3-0

@@ -1,18 +1,18 @@
 Package: IButils
 Type: Package
 Title: Utility Functions for the Interactive Brokers API
-Version: 0.3-0
-Date: 2022-10-07
+Version: 0.4-0
+Date: 2023-08-17
 Maintainer: Enrico Schumann <es@enricoschumann.net>
 Authors@R: person("Enrico", "Schumann",
                   role  = c("aut", "cre"),
                   email = "es@enricoschumann.net",
                   comment = c(ORCID = "0000-0001-7601-6576"))
-Description: Utility functions for the Interactive Brokers API,
-             based on packages 'IBrokers' and
-             'rib' (<https://github.com/lbilli/rib>).
+Description: Utility functions for the Interactive Brokers
+             API, based on packages 'IBrokers' and 'rib'.
              The package provides tools, for instance, for
-             downloading historical data and reports from IB.
+             downloading historical data and reports from
+             IB.
 License: GPL-3
 Imports: IBrokers, textutils, zoo
 Suggests: rib, uuid
