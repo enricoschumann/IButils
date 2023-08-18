@@ -17,17 +17,18 @@ R6::R6Class("IBWrap",
             self$Data$executions <- list()
             self$Data$contracts <- list()
             self$Data$commissionReport <- list()
+            self$Data$accountSummary <- list()
         },
-    
+
 
         tickPrice= function(tickerId, field, price, size, attrib) warning("default 'tickPrice' implementation"),
-    
+
         tickSize= function(tickerId, field, size) warning("default 'tickSize' implementation"),
 
         tickOptionComputation= function(tickerId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice) warning("default 'tickOptionComputation' implementation"),
 
         tickGeneric= function(tickerId, tickType, value) warning("default 'tickGeneric' implementation"),
-    
+
         tickString= function(tickerId, tickType, value) warning("default 'tickString' implementation"),
 
         tickEFP= function(tickerId, tickType, basisPoints, formattedBasisPoints, totalDividends, holdDays, futureLastTradeDate, dividendImpact, dividendsToLastTradeDate) warning("default 'tickEFP' implementation"),
@@ -70,7 +71,7 @@ R6::R6Class("IBWrap",
     contractDetails= function(reqId, contractDetails) {
       message(reqId)
       message(contractDetails)
-      self$Data$contracts[[as.character(contractDetails[[1]]$conId)]] <- contractDetails      
+      self$Data$contracts[[as.character(contractDetails[[1]]$conId)]] <- contractDetails
     },
 
     bondContractDetails= function(reqId, contractDetails) warning("default 'bondContractDetails' implementation"),
@@ -139,16 +140,22 @@ R6::R6Class("IBWrap",
       L <- list(account = account, contract = contract,
                 position = position, avgCost = avgCost)
       self$Data$positions <- c(self$Data$positions, list(L))
-      
+
     },
 
     positionEnd= function() {
-
+        message("positionEnd: done")
     },
 
-    accountSummary= function(reqId, account, tag, value, currency) warning("default 'accountSummary' implementation"),
+    accountSummary= function(reqId, account, tag, value, currency) {
+        L <- list(account = account, tag = tag,
+                  value = value, currency = currency)
+        self$Data$accountSummary <- c(self$Data$accountSummary, list(L))
+    },
 
-    accountSummaryEnd= function(reqId) warning("default 'accountSummaryEnd' implementation"),
+    accountSummaryEnd= function(reqId) {
+        message("accountSummaryEnd: done")
+    },
 
     verifyMessageAPI= function(apiData) warning("default 'verifyMessageAPI' implementation"),
 

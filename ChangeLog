@@ -1,7 +1,10 @@
 2023-08-18  Enrico Schumann  <es@enricoschumann.net>
 
-	* R/ib_hist_data.R: argument "trim" is no longer
-	ignored when backend is "rib",
+        * R/rib.R (positions): add results of
+        "reqAccountSummary" as an attribute
+
+        * R/ib_hist_data.R: argument "trim" is no longer
+        ignored when backend is "rib"
 
 2023-08-17  Enrico Schumann  <es@enricoschumann.net>
 

@@ -237,40 +237,55 @@ positions <- function(port = 7496, clientId = 1) {
 
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
-    
+
     wrap <- .wrap$new()
     ic   <- rib::IBClient$new()
-    
+
     capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
     capture.output(ic$checkMsg(wrap))
-    
+
     ic$reqPositions()
-    
+
     done <- FALSE
     while (!done) {
         count <- ic$checkMsg(wrap)
         if (count == 0L)
             done <- TRUE
     }
-    
+
     ic$cancelPositions()
     ic$checkMsg(wrap)
-    
+
+    ## account summary (cash)
+    ic$reqAccountSummary(1, groupName = "All", tags = "$LEDGER")
+    done <- FALSE
+    while (!done) {
+        count <- ic$checkMsg(wrap)
+        if (count == 0L)
+            done <- TRUE
+    }
+    ic$cancelAccountSummary(1)
+    ic$checkMsg(wrap)
+
+    accountSummary <- do.call(rbind, wrap$Data$accountSummary)
+
     account <- unlist(lapply(wrap$Data$positions, `[[`, "account"))
-    
+
     contract <- lapply(wrap$Data$positions, `[[`, "contract")
     contract <- do.call(rbind, contract)
-    
+
     pos <- unlist(lapply(wrap$Data$positions, `[[`, "position"))
-    
+
     cost <- unlist(lapply(wrap$Data$positions, `[[`, "avgCost"))
-    
+
     ans <- cbind(account,
                  contract,
                  position = pos,
                  avg.cost = cost)
-    as.data.frame(ans)
+    ans <- as.data.frame(ans)
+    attr(ans, "accountSummary") <- accountSummary
+    ans
 }
 
 order_status <- function(port = 7496, clientId = 1) {
