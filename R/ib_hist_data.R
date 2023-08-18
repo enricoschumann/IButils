@@ -1,26 +1,27 @@
-ib_hist_data <- function(Symbol,
-                         Security_Type,
-                         Exchange,
-                         Currency,
-                         id = NULL,
-                         directory,
-                         barSize,
-                         durationStr = NULL,
-                         whatToShow,
-                         start = as.POSIXct(Sys.Date() - 30), ## POSIXct
-                         end   = Sys.time(),                  ## POSIXct
-                         useRTH = FALSE,
-                         skip.from,
-                         skip.until,
-                         skip.tz = "",
-                         verbose = TRUE,
-                         trim = TRUE,
-                         accumulate = FALSE,
-                         port = 7496,
-                         sep = ",",
-                         filename = "%id%_%start%_%end%",
-                         backend = NULL,
-                         clientId = NULL) {
+ib_hist_data <-
+function(Symbol,
+         Security_Type,
+         Exchange,
+         Currency,
+         id = NULL,
+         directory,
+         barSize,
+         durationStr = NULL,
+         whatToShow,
+         start = as.POSIXct(Sys.Date() - 30), ## POSIXct
+         end   = Sys.time(),                  ## POSIXct
+         useRTH = FALSE,
+         skip.from,
+         skip.until,
+         skip.tz = "",
+         verbose = TRUE,
+         trim = TRUE,
+         accumulate = FALSE,
+         port = 7496,
+         sep = ",",
+         filename = "%id%_%start%_%end%",
+         backend = NULL,
+         clientId = NULL) {
 
     if (!dir.exists(directory))
         stop(sQuote("directory"), " does not exist")
@@ -209,6 +210,8 @@ ib_hist_data <- function(Symbol,
 
     } else if (tolower(backend) == "rib") {
 
+        end0 <- end
+
         if (is.list(Symbol))
             contract <- Symbol
         else
@@ -243,7 +246,8 @@ ib_hist_data <- function(Symbol,
         if (is.null(start))
             start <- earliest
 
-        message("Data available back to ", as.character(.POSIXct(earliest)))
+        if (verbose)
+            message("Data available back to ", as.character(.POSIXct(earliest)))
         while (start < end) {
             ## end <- as.POSIXct("2020-02-20 16:00:00", tz = "UTC")
 
@@ -303,7 +307,7 @@ ib_hist_data <- function(Symbol,
             end <- .POSIXct(min(h0[, 1L]))
             message("==> received data back to ", as.character(end))
 
-            if (min(h0[, 1L]) <= earliest)
+            if (min(h0[, 1L]) <= earliest || min(h0[, 1L]) <= start)
                 break
 
             if (do.wait)
@@ -312,9 +316,11 @@ ib_hist_data <- function(Symbol,
         }
 
         if (accumulate) {
+            ## FIXME: transform to data.frame?
             ## H$time <- .POSIXct(as.numeric(H[, "timestamp"]))
             if (trim) {
-                browser()
+                H <- H[H[, "timestamp"] >= start &
+                       H[, "timestamp"] >= end0, ]
             }
             H
         } else {
