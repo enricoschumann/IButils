@@ -70,6 +70,24 @@ there: there may be several spaces within a symbol
 string, which would be easy to miss otherwise.)
 
 
+
+** Reading flex reports
+
+Function =flex_web_service= downloads flex queries; see
+[[https://quant.stackexchange.com/questions/37662/interactive-brokers-automating-collection-of-client-account-position-without-tw/37677#37677][Automating collection of client account position
+without TWS/IB Gateway]].
+
+Reports can be read with =read_flex_report=.  That
+function assumes that section headers were used.  See
+these example settings:
+
+Delivery configuration:
+[[file:flex_delivery_config1.png]]
+
+General configuration:
+[[flex_general_config1.png]]
+
+
 ** TWS helper functions
    
    The package provides several convenience functions.
@@ -94,6 +112,8 @@ string, which would be easy to miss otherwise.)
 #+begin_src R :eval never :export both   
    executions()
 #+end_src
+
+
 
 
 ** News, feedback and discussion
