@@ -71,7 +71,7 @@ R6::R6Class("IBWrap",
     contractDetails= function(reqId, contractDetails) {
       message(reqId)
       message(contractDetails)
-      self$Data$contracts[[as.character(contractDetails[[1]]$conId)]] <- contractDetails
+      self$Data$contracts[[as.character(reqId)]] <- contractDetails
     },
 
     bondContractDetails= function(reqId, contractDetails) warning("default 'bondContractDetails' implementation"),
