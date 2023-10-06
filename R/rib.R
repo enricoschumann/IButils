@@ -409,6 +409,7 @@ executions <- function(port = 7496, clientId = 1) {
 
 ## }
 
+
 contract_details <- function(localSymbol,
                              secType,
                              exchange,
@@ -425,9 +426,10 @@ contract_details <- function(localSymbol,
     on.exit(ic$disconnect())
     msg2 <- capture.output(n <- ic$checkMsg(wrap))
 
-    if (is.list(localSymbol))
-        contract <- localSymbol
-    else
+    if (is.list(localSymbol)) {
+        contract <- rib::Contract
+        contract[names(localSymbol)] <- localSymbol
+    } else
         contract <- rib::IBContract(localSymbol = localSymbol,
                                     secType  = secType,
                                     exchange = exchange,

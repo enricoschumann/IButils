@@ -1,10 +1,13 @@
-v0.4-0  (2023-08-17; not released yet)
+v0.4-0  (2023-10-06; not released yet)
 
   o functions that use "rib" now require a recent version
     of that package (>=0.19.0)
 
   o 'ib_hist_data': argument "trim" is no longer ignored
     when backend is "rib"
+
+  o 'contract_details' is more flexible, e.g. allows
+    fetch contract data based on ISINs
 
   o ....
   
