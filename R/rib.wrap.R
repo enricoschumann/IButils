@@ -1,9 +1,9 @@
 .wrap <-
 R6::R6Class("IBWrap",
 
-    class=      FALSE,
-    cloneable=  FALSE,
-    lock_class= TRUE,
+    class = FALSE,
+    cloneable = FALSE,
+    lock_class = TRUE,
 
     inherit= rib::IBWrap,
     public= list(
@@ -11,13 +11,15 @@ R6::R6Class("IBWrap",
         Data= NULL,
 
         initialize= function() {
+
             self$Data <- new.env()
-            self$Data$orders <- list()
+
+            self$Data$orders      <- list()
             self$Data$orderStatus <- list()
-            self$Data$executions <- list()
-            self$Data$contracts <- list()
+            self$Data$executions  <- list()
+            self$Data$contracts   <- list()
             self$Data$commissionReport <- list()
-            self$Data$accountSummary <- list()
+            self$Data$accountSummary   <- list()
         },
 
 
@@ -25,13 +27,21 @@ R6::R6Class("IBWrap",
 
         tickSize= function(tickerId, field, size) warning("default 'tickSize' implementation"),
 
-        tickOptionComputation= function(tickerId, tickType, tickAttrib, impliedVol, delta, optPrice, pvDividend, gamma, vega, theta, undPrice) warning("default 'tickOptionComputation' implementation"),
+        tickOptionComputation= function(tickerId, tickType,
+                                        tickAttrib, impliedVol,
+                                        delta, optPrice, pvDividend,
+                                        gamma, vega, theta, undPrice)
+                                   warning("default 'tickOptionComputation' implementation"),
 
         tickGeneric= function(tickerId, tickType, value) warning("default 'tickGeneric' implementation"),
 
         tickString= function(tickerId, tickType, value) warning("default 'tickString' implementation"),
 
-        tickEFP= function(tickerId, tickType, basisPoints, formattedBasisPoints, totalDividends, holdDays, futureLastTradeDate, dividendImpact, dividendsToLastTradeDate) warning("default 'tickEFP' implementation"),
+        tickEFP= function(tickerId, tickType, basisPoints,
+                          formattedBasisPoints, totalDividends,
+                          holdDays, futureLastTradeDate, dividendImpact,
+                          dividendsToLastTradeDate)
+                     warning("default 'tickEFP' implementation"),
 
         orderStatus = function(orderId, status, filled, remaining,
                                avgFillPrice, permId, parentId, lastFillPrice,
@@ -92,8 +102,11 @@ R6::R6Class("IBWrap",
     },
 
     error= function(id, errorCode, errorString, advancedOrderRejectJson) {
-      message(format(id, width = 6),
-              "|", format(errorCode, width = 6), ": ", errorString)
+        if (errorCode %in% c(2104, 2158, 2106)) {
+            cat(format(errorCode, width = 6), ": ", errorString, "\n")
+        } else
+            message(format(id, width = 6),
+                    "|", format(errorCode, width = 6), ": ", errorString)
     },
 
     updateMktDepth= function(id, position, operation, side, price, size) warning("default 'updateMktDepth' implementation"),
@@ -119,7 +132,10 @@ R6::R6Class("IBWrap",
 
     scannerData= function(reqId, rank, contractDetails, distance, benchmark, projection, legsStr) warning("default 'scannerData' implementation"),
 
-    realtimeBar= function(reqId, time, open, high, low, close, volume, wap, count) warning("default 'realtimeBar' implementation"),
+    realtimeBar= function(reqId, time, open, high, low, close,
+                          volume, wap, count) {
+        message(reqId, " | ", .POSIXct(time), " | ", open, " | ", close)
+    },
 
     currentTime= function(time) warning("default 'currentTime' implementation"),
 

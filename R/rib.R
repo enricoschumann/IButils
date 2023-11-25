@@ -163,8 +163,9 @@ IBWrap.IButils <-
 
         error = function(id, errorCode, errorString, advancedOrderRejectJson) {
             if (errorCode == 2104)
-                        cat(errorString, "\n")
-            cat(id, errorCode, errorString, "\n")
+                cat(errorString, "\n")
+            else 
+                cat(id, errorCode, errorString, "\n")
         },
 
         nextValidId = function(orderId) {
