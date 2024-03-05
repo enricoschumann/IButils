@@ -9,17 +9,27 @@ R6::R6Class("IBWrap",
     public= list(
 
         Data= NULL,
+        Settings = NULL,
 
         initialize= function() {
 
-            self$Data <- new.env()
+            self$Settings <- new.env()
+            self$Settings$storeMessages <- FALSE
 
+
+            self$Data <- new.env()
             self$Data$orders      <- list()
             self$Data$orderStatus <- list()
             self$Data$executions  <- list()
             self$Data$contracts   <- list()
             self$Data$commissionReport <- list()
             self$Data$accountSummary   <- list()
+
+            self$Data$historicalData <- list()
+
+            self$Data$recentMessages <- list()
+
+          
         },
 
 
@@ -79,8 +89,6 @@ R6::R6Class("IBWrap",
         },
 
     contractDetails= function(reqId, contractDetails) {
-      message(reqId)
-      message(contractDetails)
       self$Data$contracts[[as.character(reqId)]] <- contractDetails
     },
 
@@ -102,6 +110,13 @@ R6::R6Class("IBWrap",
     },
 
     error= function(id, errorCode, errorString, advancedOrderRejectJson) {
+        if (self$Settings$storeMessages) {
+            n <- as.character(round(unclass(Sys.time()), 5))
+            self$Data$recentMessages[[n]] <- list(id,
+                                                  errorCode,
+                                                  errorString,
+                                                  advancedOrderRejectJson)
+        }
         if (errorCode %in% c(2104, 2158, 2106)) {
             cat(format(errorCode, width = 6), ": ", errorString, "\n")
         } else
@@ -126,7 +141,10 @@ R6::R6Class("IBWrap",
 
     receiveFA= function(faDataType, xml) warning("default 'receiveFA' implementation"),
 
-    historicalData= function(reqId, bar) warning("default 'historicalData' implementation"),
+    historicalData= function(reqId, bar) {
+        self$Data$historicalData[[reqId]] <- bar
+        cat("historicalData:", reqId, "Rows:", nrow(self$Data$historicalData), "\n")
+    },
 
     scannerParameters= function(xml) warning("default 'scannerParameters' implementation"),
 

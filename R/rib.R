@@ -55,29 +55,35 @@ read_orders <- function(dir, pattern = NULL, ...) {
     res
 }
 
-send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
+send_orders <- function(dir, sent.dir, ...,
+                        port = 7496, clientId = 1) {
 
     fs <- list.files(dir, full.names = TRUE,
                      pattern = "[^~]$")
 
-    wrap <- wrap0$new()
-    ic   <- rib::IBClient$new(wrap)
+    wrap <- .wrap$new()
+    ic   <- rib::IBClient$new()
 
-    ic$connect(port=7496, clientId=1)
-    capture.output(ic$checkMsg(wrap))
-    on.exit(ic$disconnect())
+    ic$connect(port=port, clientId=clientId)
+    ic$checkMsg(wrap)
+    on.exit({
+        ic$disconnect()
+        wrap$Settings$storeMessages <- FALSE
 
-    if (is.null(wrap$Data$nextId)) {
-        ic$reqIds()
-        ic$checkMsg(wrap)
-    }
+    })
+
+    wrap$Settings$storeMessages <- TRUE
 
     for (f in fs) {
-        o <- read.table(f, header = TRUE, sep = ",")
         ic$reqIds()
         ic$checkMsg(wrap)
-        orderId <- wrap$Data$nextId
+        orderId <- wrap$Data$nextValidId
+        if (is.null(wrap$Data$nextValidId)) {
+            stop("no id")
+        }
+        wrap$Data$recentMessages <- list()
 
+        o <- read.table(f, header = TRUE, sep = ",")
         contract <- rib::Contract
         contract$localSymbol <- o$localSymbol
         contract$exchange <- o$exchange
@@ -100,6 +106,17 @@ send_orders <- function(dir, sent.dir, ..., port = 7496, cliendId=1) {
 
         ic$placeOrder(orderId, contract, order)
         res <- ic$checkMsg(wrap)
+
+        if(length(wrap$Data$recentMessages)) {
+            e <- sapply(wrap$Data$recentMessages, `[[`, 2)
+            if (any(no.send <- (e %in% 110))) {
+                m <- sapply(wrap$Data$recentMessages, `[[`, 3)
+                message("file ", f)
+                message("==> [ERROR] ", m[no.send])
+                next
+            }
+        }
+
         copied <- file.copy(f, sent.dir)
         if (copied)
             file.remove(f)
@@ -164,7 +181,7 @@ IBWrap.IButils <-
         error = function(id, errorCode, errorString, advancedOrderRejectJson) {
             if (errorCode == 2104)
                 cat(errorString, "\n")
-            else 
+            else
                 cat(id, errorCode, errorString, "\n")
         },
 
@@ -425,7 +442,7 @@ contract_details <- function(localSymbol,
 
     msg1 <- capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
-    msg2 <- capture.output(n <- ic$checkMsg(wrap))
+    msg2 <- (n <- ic$checkMsg(wrap))
 
     if (is.list(localSymbol)) {
         contract <- rib::Contract
@@ -438,7 +455,7 @@ contract_details <- function(localSymbol,
 
     contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
     ic$reqContractDetails(1, contract = contract)
-    msg3 <- capture.output(n <- ic$checkMsg(wrap))
+    msg3 <- (n <- ic$checkMsg(wrap))
     ans <- wrap$Data$contract[[1]]
     attr(ans, "messages") <- c(msg1, msg2, msg3)
     ans
