@@ -80,7 +80,7 @@ flex_web_service(file, token, query, version = 3, delay = 2,
 
 }
 \references{
-  \url{https://www.interactivebrokers.com/en/software/am/am/reports/flex_web_service_version_3.htm}
+  \url{https://ibkrcampus.com/ibkr-api-page/flex-web-service/}
 }
 \author{
   Enrico Schumann
