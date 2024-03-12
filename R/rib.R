@@ -91,7 +91,7 @@ send_orders <- function(dir, sent.dir, ...,
         contract$secType <- o$secType
 
         order <- rib::Order
-        order$action <- if (o$amount > 1) "BUY" else "SELL"
+        order$action <- o$action
         order$totalQuantity <- o$amount
         order$orderRef <- o$uuid
         order$account <- o$account
@@ -107,7 +107,7 @@ send_orders <- function(dir, sent.dir, ...,
         ic$placeOrder(orderId, contract, order)
         res <- ic$checkMsg(wrap)
 
-        if(length(wrap$Data$recentMessages)) {
+        if (length(wrap$Data$recentMessages)) {
             e <- sapply(wrap$Data$recentMessages, `[[`, 2)
             if (any(no.send <- (e %in% 110))) {
                 m <- sapply(wrap$Data$recentMessages, `[[`, 3)
@@ -117,6 +117,23 @@ send_orders <- function(dir, sent.dir, ...,
             }
         }
 
+        ic$reqAllOpenOrders()
+        done <- FALSE
+        while (!done) {
+            count <- ic$checkMsg(wrap)
+            if (count == 0L)
+                done <- TRUE
+            Sys.sleep(0.1)
+        }
+        
+        known.orders <- sapply(lapply(wrap$Data$orders, `[[`, 3), `[[`, "orderRef")
+        if (!o$uuid %in% known.orders) {
+            message("file ", f)
+            message("==> [WARNING] order ", o$uuid, " not found in current orders")
+        }
+        
+
+        
         copied <- file.copy(f, sent.dir)
         if (copied)
             file.remove(f)
