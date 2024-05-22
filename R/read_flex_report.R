@@ -3,7 +3,8 @@ function(file,
          date.format = "yyyy-MM-dd",
          time.format = "HH:mm:ss",
          date.time.separator = ",",
-         ...) {
+         ...,
+         fill = FALSE) {
 
     txt <- readLines(file, warn = FALSE)
     bof <- grep("^.?BOF", txt)
@@ -14,6 +15,16 @@ function(file,
     sections <- grep("^.?BOS", txt)
     sections <- read.table(text = unique(txt[sections]),
                            sep = ",", quote= "\"")
+
+    accounts <- grep("^.?BOA", txt)
+    accounts <- read.table(text = unique(txt[accounts]),
+                           sep = ",", quote= "\"")
+
+    ## ans <- vector("list", nrow(accounts))
+    ## for (section in sections) {
+
+    ## }
+
     ans <- vector("list", nrow(sections))
     names(ans) <- sections[[3]]
     for (i in seq_along(ans)) {
@@ -22,7 +33,8 @@ function(file,
                                     sep = ",", quote = "\""))
         ii <- grep(paste0("DATA.,.", sections[i, 2]), txt)
         if (length(ii)) {
-            tb <- read.table(text = txt[ii], sep = ",", quote= "\"")
+            tb <- read.table(text = txt[ii], sep = ",", quote= "\"",
+                             fill = fill)
             colnames(tb) <- header
             ans[[i]] <- tb
         }

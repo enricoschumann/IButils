@@ -4,6 +4,9 @@
         'realtimeBar', which stores the "close" price in
         Data$close
 
+        * R/read_flex_report.R: add an argument 'fill', which
+        is passed on to 'read.table'
+
 2024-03-12  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.R (send_orders): check open orders after having
