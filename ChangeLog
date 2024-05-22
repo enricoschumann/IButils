@@ -1,3 +1,9 @@
+2024-05-22  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib.wrap.R: add minimal implementation for
+        'realtimeBar', which stores the "close" price in
+        Data$close
+
 2024-03-12  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.R (send_orders): check open orders after having

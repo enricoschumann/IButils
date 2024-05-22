@@ -29,6 +29,7 @@ R6::R6Class("IBWrap",
 
             self$Data$recentMessages <- list()
 
+            self$Data$Close <- list()
           
         },
 
@@ -153,6 +154,7 @@ R6::R6Class("IBWrap",
     realtimeBar= function(reqId, time, open, high, low, close,
                           volume, wap, count) {
         message(reqId, " | ", .POSIXct(time), " | ", open, " | ", close)
+        self$Data$Close[reqId] <- close
     },
 
     currentTime= function(time) warning("default 'currentTime' implementation"),
