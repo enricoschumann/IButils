@@ -12,6 +12,8 @@ function(file,
     if (length(txt) != eof)
         warning("eof does not match actual file length")
 
+    ## BOS = Beginning Of Section
+    ## ==> the three fields: BOS, abbrev, name
     sections <- grep("^.?BOS", txt)
     sections <- read.table(text = unique(txt[sections]),
                            sep = ",", quote= "\"")
