@@ -2,7 +2,7 @@ Package: IButils
 Type: Package
 Title: Utility Functions for the Interactive Brokers API
 Version: 0.4-0
-Date: 2024-03-12
+Date: 2024-11-21
 Maintainer: Enrico Schumann <es@enricoschumann.net>
 Authors@R: person("Enrico", "Schumann",
                   role  = c("aut", "cre"),
@@ -16,6 +16,6 @@ Description: Utility functions for the Interactive Brokers
 License: GPL-3
 Imports: IBrokers, textutils, zoo
 Suggests: rib, uuid
-Additional_repositories: http://enricoschumann.net/R/
-URL: http://enricoschumann.net/R/packages/IButils/,
+Additional_repositories: https://enricoschumann.net/R/
+URL: https://enricoschumann.net/R/packages/IButils/,
      https://github.com/enricoschumann/IButils

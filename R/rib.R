@@ -125,15 +125,15 @@ send_orders <- function(dir, sent.dir, ...,
                 done <- TRUE
             Sys.sleep(0.1)
         }
-        
+
         known.orders <- sapply(lapply(wrap$Data$orders, `[[`, 3), `[[`, "orderRef")
         if (!o$uuid %in% known.orders) {
             message("file ", f)
             message("==> [WARNING] order ", o$uuid, " not found in current orders")
         }
-        
 
-        
+
+
         copied <- file.copy(f, sent.dir)
         if (copied)
             file.remove(f)
@@ -449,32 +449,89 @@ contract_details <- function(localSymbol,
                              secType,
                              exchange,
                              currency,
-                             port = 7496, clientId = 1) {
+                             port = 7496,
+                             clientId = 1) {
 
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
 
-    wrap <- wrap0$new()
+    N <- 0
+    if (is.character(localSymbol)) {
+        N <- max(length(localSymbol),
+                 length(secType),
+                 length(exchange),
+                 length(currency))
+        localSymbol <- rep(localSymbol, N/length(localSymbol))
+        secType     <- rep(secType,     N/length(secType))
+        exchange    <- rep(exchange,    N/length(exchange))
+        currency    <- rep(currency,    N/length(currency))
+        Contracts <- vector("list", length = N)
+        for (i in seq_len(N)) {
+            contract <- rib::Contract
+            contract["localSymbol"] <- localSymbol[i]
+            contract["secType"] <- secType[i]
+            contract["exchange"] <- exchange[i]
+            contract["currency"] <- currency[i]
+
+            Contracts[[i]] <- contract
+        }
+
+    } else {
+        min.common <- 5
+        ## single contract
+        common <- names(rib::Contract) %in% names(localSymbol)
+        if (sum(common) >= min.common) {
+            N <- 1
+            Contracts <- list()
+            contract <- rib::Contract
+            contract[names(localSymbol)] <- localSymbol
+            Contracts[[1]] <- contract
+        } else {
+            common <- lapply(localSymbol,
+                             function(x) {
+                                 sum(names(rib::Contract) %in% names(x)) > min.common
+                             })
+            if (all(unlist(common))) {
+                N <- length(localSymbol)
+                Contracts <- localSymbol
+
+            } else {
+                stop("see doc for 'LocalSymbol'")
+            }
+        }
+    }
+
+    wrap <- .wrap$new(storeMessages = TRUE,
+                      showMessages = FALSE)
+
     ic   <- rib::IBClient$new()
 
     msg1 <- capture.output(ic$connect(port = port, clientId = clientId))
     on.exit(ic$disconnect())
-    msg2 <- (n <- ic$checkMsg(wrap))
+    n <- ic$checkMsg(wrap)
+    while (n > 0) {
+        Sys.sleep(0.2)
+        n <- ic$checkMsg(wrap)
+    }
 
-    if (is.list(localSymbol)) {
-        contract <- rib::Contract
-        contract[names(localSymbol)] <- localSymbol
-    } else
-        contract <- rib::IBContract(localSymbol = localSymbol,
-                                    secType  = secType,
-                                    exchange = exchange,
-                                    currency = currency)
+    ans <- vector("list", length = N)
+    for (i in seq_len(N)) {
+        contract <- Contracts[[i]]
+        contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
+        ic$reqContractDetails("1", contract = contract)
+        n <- ic$checkMsg(wrap)
+        while (n > 0) {
+            Sys.sleep(0.2)
+            n <- ic$checkMsg(wrap)
+        }
 
-    contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
-    ic$reqContractDetails(1, contract = contract)
-    msg3 <- (n <- ic$checkMsg(wrap))
-    ans <- wrap$Data$contract[[1]]
-    attr(ans, "messages") <- c(msg1, msg2, msg3)
+        ans[[i]] <- wrap$Data$contracts[["1"]]
+    }
+
+    msg <- as.data.frame(do.call(rbind, wrap$Data$recentMessages))
+    colnames(msg) <- c("id", "errorCode",
+                       "errorString", "advancedOrderRejectJson")
+    attr(ans, "messages") <- msg
     ans
 }
 

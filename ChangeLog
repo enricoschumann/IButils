@@ -1,3 +1,12 @@
+2024-11-21  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib.wrap.R (.wrap): add 'initialize' method,
+        which allows to set parameters 'showMessages' and
+        'storeMessages'
+
+        * R/rib.R (contract_details): support contracts and
+        list of contracts as inputs
+
 2024-05-22  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.wrap.R: add minimal implementation for

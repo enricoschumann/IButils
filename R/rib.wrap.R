@@ -11,10 +11,15 @@ R6::R6Class("IBWrap",
         Data= NULL,
         Settings = NULL,
 
-        initialize= function() {
+        initialize= function(...) {
 
             self$Settings <- new.env()
             self$Settings$storeMessages <- FALSE
+            self$Settings$showMessages  <- TRUE
+            ARGS <- list(...)
+            for (setting in names(ARGS)) {
+                self$Settings[[setting]] <- ARGS[[setting]]
+            }
 
 
             self$Data <- new.env()
@@ -30,7 +35,7 @@ R6::R6Class("IBWrap",
             self$Data$recentMessages <- list()
 
             self$Data$Close <- list()
-          
+
         },
 
 
@@ -96,8 +101,9 @@ R6::R6Class("IBWrap",
     bondContractDetails= function(reqId, contractDetails) warning("default 'bondContractDetails' implementation"),
 
     contractDetailsEnd= function(reqId) {
-      message("contractDetailsEnd")
-      message("reqId")
+        invisible(NULL)
+        ## message("contractDetailsEnd")
+        ## message("reqId")
     },
 
     execDetails=        function(reqId, contract, execution) {
@@ -112,17 +118,19 @@ R6::R6Class("IBWrap",
 
     error= function(id, errorCode, errorString, advancedOrderRejectJson) {
         if (self$Settings$storeMessages) {
-            n <- as.character(round(unclass(Sys.time()), 5))
+            n <- as.character(round(unclass(Sys.time()), 6))
             self$Data$recentMessages[[n]] <- list(id,
                                                   errorCode,
                                                   errorString,
                                                   advancedOrderRejectJson)
         }
-        if (errorCode %in% c(2104, 2158, 2106)) {
-            cat(format(errorCode, width = 6), ": ", errorString, "\n")
-        } else
-            message(format(id, width = 6),
-                    "|", format(errorCode, width = 6), ": ", errorString)
+        if (self$Settings$showMessages &&
+            errorCode %in% c(2104, 2158, 2106)) {
+            cat(format(errorCode, width = 6),
+                ": ", errorString, "\n")
+        } else if (self$Settings$showMessages)
+            cat(format(id, width = 6),
+                "|", format(errorCode, width = 6), ": ", errorString, "\n")
     },
 
     updateMktDepth= function(id, position, operation, side, price, size) warning("default 'updateMktDepth' implementation"),
@@ -132,11 +140,13 @@ R6::R6Class("IBWrap",
     updateNewsBulletin= function(msgId, msgType, newsMessage, originExch) warning("default 'updateNewsBulletin' implementation"),
 
     managedAccounts= function(accountsList) {
-      cat("Accounts: \n")
-      acc <- paste(paste("  ",
-                         sort(unlist(strsplit(accountsList, ",")))),
-                   collapse = "\n")
-      cat(acc, "\n\n")
+      if (self$Settings$showMessages) {
+          cat("Accounts: \n")
+          acc <- paste(paste("  ",
+                             sort(unlist(strsplit(accountsList, ",")))),
+                       collapse = "\n")
+          cat(acc, "\n\n")
+      }
       invisible(NULL)
     },
 
