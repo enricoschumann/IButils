@@ -1,4 +1,4 @@
-v0.4-0  (2024-11-21; not released yet)
+v0.4-0  (2024-11-22; not released yet)
 
   o functions that use "rib" now require a recent version
     of that package (>=0.19.0)
@@ -9,8 +9,10 @@ v0.4-0  (2024-11-21; not released yet)
   o 'contract_details' is more flexible, e.g. allows
     fetch contract data based on ISINs
 
+  o 'positions' includes cash balances
+
   o ....
-  
+
 v0.3-0  (2022-10-07)
 
   o maintenance release, primarily to accommodate changes

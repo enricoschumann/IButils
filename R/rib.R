@@ -268,31 +268,80 @@ IBWrap.IButils <-
     )
 )
 
-positions <- function(port = 7496, clientId = 1) {
+positions <- function(port = 7496, clientId = 1,
+                      contractFields = c("conId", "localSymbol", "currency"),
+                      verbose = TRUE) {
 
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
 
-    wrap <- .wrap$new()
+    wrap <- .wrap$new(storeMessages = TRUE,
+                      showMessages = FALSE)
+
     ic   <- rib::IBClient$new()
 
-    capture.output(ic$connect(port = port, clientId = clientId))
+    ic$connect(port = port, clientId = clientId)
     on.exit(ic$disconnect())
-    capture.output(ic$checkMsg(wrap))
 
+    done <- FALSE
+    while (!done) {
+        count <- ic$checkMsg(wrap)
+        if (count == 0L)
+            done <- TRUE else Sys.sleep(0.1)
+    }
+
+    if (verbose)
+        message("Fetch positions ... ", appendLF = FALSE)
     ic$reqPositions()
 
     done <- FALSE
     while (!done) {
         count <- ic$checkMsg(wrap)
         if (count == 0L)
-            done <- TRUE
+            done <- TRUE else Sys.sleep(0.1)
+    }
+    ic$cancelPositions()
+
+    done <- FALSE
+    while (!done) {
+        count <- ic$checkMsg(wrap)
+        if (count == 0L)
+            done <- TRUE else Sys.sleep(0.1)
+    }
+    if (verbose)
+        message("[done]")
+
+    ## wrap$Data$positions
+    ## ==> account, contract, position, avgcost
+
+
+    if (verbose)
+        message("Fetch account data")
+
+    wrap$Data$accountData <- list()
+    wrap$Data$portfolioData <- list()
+    accounts <- wrap$Data$managedAccounts
+
+    for (account in accounts) {
+        message("    ", account, " ... ", appendLF = FALSE)
+        ic$reqAccountUpdates(TRUE, account)
+        done <- FALSE
+        Sys.sleep(0.1)
+        while (!done) {
+            count <- ic$checkMsg(wrap)
+            if (count == 0L)
+                done <- TRUE else Sys.sleep(0.1)
+        }
+        ic$reqAccountUpdates(FALSE, account)
+        message("[done]")
     }
 
-    ic$cancelPositions()
-    ic$checkMsg(wrap)
+
 
     ## account summary (cash)
+    if (verbose)
+        message("Fetch account summary ... ", appendLF = FALSE)
+    wrap$Data$accountSummary <- NULL
     ic$reqAccountSummary(1, groupName = "All", tags = "$LEDGER")
     done <- FALSE
     while (!done) {
@@ -302,24 +351,49 @@ positions <- function(port = 7496, clientId = 1) {
     }
     ic$cancelAccountSummary(1)
     ic$checkMsg(wrap)
+    message("[done]")
 
     accountSummary <- do.call(rbind, wrap$Data$accountSummary)
 
     account <- unlist(lapply(wrap$Data$positions, `[[`, "account"))
 
-    contract <- lapply(wrap$Data$positions, `[[`, "contract")
-    contract <- do.call(rbind, contract)
+    Contracts <- lapply(wrap$Data$positions, `[[`, "contract")
+    contract <- do.call(rbind, Contracts)
 
     pos <- unlist(lapply(wrap$Data$positions, `[[`, "position"))
 
     cost <- unlist(lapply(wrap$Data$positions, `[[`, "avgCost"))
 
+    accountData <- wrap$Data$accountData
+    keys   <- unlist(accountData[seq(1, length(accountData), by = 4)])
+    values <- unlist(accountData[seq(2, length(accountData), by = 4)])
+    currencies <- unlist(accountData[seq(3, length(accountData), by = 4)])
+    accounts <- unlist(accountData[seq(4, length(accountData), by = 4)])
+
+    account_  <- NULL
+    currency_ <- NULL
+    value_    <- NULL
+    for (account in unique(accounts)) {
+        i <- account == accounts &
+             keys == "CashBalance" &
+             currencies != "BASE"
+        account_  <- c(account_, rep.int(account, sum(i)))
+        currency_ <- c(currency_, currencies[i])
+        value_    <- c(value_, values[i])
+    }
+
+    CashBalance <- data.frame(account = account_,
+                              currency = currency_,
+                              value = as.numeric(value_))
+
     ans <- cbind(account,
-                 contract,
+                 contract = contract[, contractFields],
                  position = pos,
-                 avg.cost = cost)
+                 avgCost = cost)
     ans <- as.data.frame(ans)
-    attr(ans, "accountSummary") <- accountSummary
+    attr(ans, "AccountSummary") <- accountSummary
+    attr(ans, "CashBalances") <- CashBalance
+    attr(ans, "Contracts") <- Contracts
     ans
 }
 

@@ -80,15 +80,27 @@ R6::R6Class("IBWrap",
             message("openOrderEnd")
         },
 
-#    connectionClosed= function() warning("default implementation"),
+        #    connectionClosed= function() warning("default implementation"),
 
-        updateAccountValue= function(key, val, currency, accountName) warning("default 'updateAccountValue' implementation"),
+        updateAccountValue= function(key, val, currency, accountName) {
+            v <- list(key = key, value = val, currency = currency, accountName = accountName)
+            self$Data$accountData <-
+                c(self$Data$accountData, v)
+        },
+        updatePortfolio= function(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName) {
+            v <- list(contract, position, marketPrice, marketValue,
+                      averageCost, unrealizedPNL, realizedPNL, accountName)
+            self$Data$portfolioData <- c(self$Data$portfolioData, list(v))
 
-        updatePortfolio= function(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName) warning("default 'updatePortfolio' implementation"),
+        },
 
-        updateAccountTime= function(timeStamp) warning("default 'updateAccountTime' implementation"),
+        updateAccountTime= function(timeStamp) {
+            invisible(NULL)
+        },
 
-        accountDownloadEnd= function(accountName) warning("default 'accountDownloadEnd' implementation"),
+        accountDownloadEnd= function(accountName) {
+            invisible(NULL)
+        },
 
         nextValidId= function(orderId) {
             self$Data$nextValidId <- orderId
@@ -102,8 +114,6 @@ R6::R6Class("IBWrap",
 
     contractDetailsEnd= function(reqId) {
         invisible(NULL)
-        ## message("contractDetailsEnd")
-        ## message("reqId")
     },
 
     execDetails=        function(reqId, contract, execution) {
@@ -146,6 +156,8 @@ R6::R6Class("IBWrap",
                              sort(unlist(strsplit(accountsList, ",")))),
                        collapse = "\n")
           cat(acc, "\n\n")
+      } else {
+          self$Data$managedAccounts <- sort(unlist(strsplit(accountsList, ",")))
       }
       invisible(NULL)
     },
@@ -190,7 +202,8 @@ R6::R6Class("IBWrap",
     },
 
     positionEnd= function() {
-        message("positionEnd: done")
+        invisible(NULL)
+        ## message("done")
     },
 
     accountSummary= function(reqId, account, tag, value, currency) {
@@ -200,7 +213,8 @@ R6::R6Class("IBWrap",
     },
 
     accountSummaryEnd= function(reqId) {
-        message("accountSummaryEnd: done")
+        NULL
+        ## message("accountSummaryEnd: done")
     },
 
     verifyMessageAPI= function(apiData) warning("default 'verifyMessageAPI' implementation"),

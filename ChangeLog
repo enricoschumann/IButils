@@ -1,3 +1,16 @@
+2024-11-22  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib.R (positions): fetch cash balances and add
+        as attribute 'CashBalances'
+        (positions): new argument 'contractFields', for
+        specifying fields that are included in result; full
+        contracts are attached to results as attribute
+        'Contracts'
+
+        * R/rib.wrap.R (.wrap): implement
+        'updateAccountValue' and 'updatePortfolio'; store
+        accountsList in 'Data$managedAccounts'
+
 2024-11-21  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.wrap.R (.wrap): add 'initialize' method,
