@@ -339,30 +339,22 @@ positions <- function(port = 7496, clientId = 1,
 
 
     ## account summary (cash)
-    if (verbose)
-        message("Fetch account summary ... ", appendLF = FALSE)
-    wrap$Data$accountSummary <- NULL
-    ic$reqAccountSummary(1, groupName = "All", tags = "$LEDGER")
-    done <- FALSE
-    while (!done) {
-        count <- ic$checkMsg(wrap)
-        if (count == 0L)
-            done <- TRUE
-    }
-    ic$cancelAccountSummary(1)
-    ic$checkMsg(wrap)
-    message("[done]")
+    ## if (verbose)
+    ##     message("Fetch account summary ... ", appendLF = FALSE)
+    ## wrap$Data$accountSummary <- NULL
+    ## ic$reqAccountSummary(1, groupName = "All", tags = "$LEDGER")
+    ## done <- FALSE
+    ## while (!done) {
+    ##     count <- ic$checkMsg(wrap)
+    ##     if (count == 0L)
+    ##         done <- TRUE
+    ## }
+    ## ic$cancelAccountSummary(1)
+    ## ic$checkMsg(wrap)
+    ## message("[done]")
 
-    accountSummary <- do.call(rbind, wrap$Data$accountSummary)
+    ## accountSummary <- do.call(rbind, wrap$Data$accountSummary)
 
-    account <- unlist(lapply(wrap$Data$positions, `[[`, "account"))
-
-    Contracts <- lapply(wrap$Data$positions, `[[`, "contract")
-    contract <- do.call(rbind, Contracts)
-
-    pos <- unlist(lapply(wrap$Data$positions, `[[`, "position"))
-
-    cost <- unlist(lapply(wrap$Data$positions, `[[`, "avgCost"))
 
     accountData <- wrap$Data$accountData
     keys   <- unlist(accountData[seq(1, length(accountData), by = 4)])
@@ -386,12 +378,19 @@ positions <- function(port = 7496, clientId = 1,
                               currency = currency_,
                               value = as.numeric(value_))
 
+
+    account <- unlist(lapply(wrap$Data$positions, `[[`, "account"))
+    Contracts <- lapply(wrap$Data$positions, `[[`, "contract")
+    contract <- do.call(rbind, Contracts)
+    pos <- unlist(lapply(wrap$Data$positions, `[[`, "position"))
+
+    cost <- unlist(lapply(wrap$Data$positions, `[[`, "avgCost"))
     ans <- cbind(account,
                  contract = contract[, contractFields],
                  position = pos,
                  avgCost = cost)
     ans <- as.data.frame(ans)
-    attr(ans, "AccountSummary") <- accountSummary
+    ## attr(ans, "AccountSummary") <- accountSummary
     attr(ans, "CashBalances") <- CashBalance
     attr(ans, "Contracts") <- Contracts
     ans

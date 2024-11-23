@@ -73,11 +73,12 @@ R6::R6Class("IBWrap",
                      contract = contract,
                      order = order,
                      orderstate = orderstate)
-            message("order ", orderId, ": added to/updated in Data$orders")
+            if (self$Settings$showMessages)
+                message("order ", orderId, ": added to/updated in Data$orders")
         },
 
         openOrderEnd= function() {
-            message("openOrderEnd")
+            invisible(NULL)
         },
 
         #    connectionClosed= function() warning("default implementation"),
@@ -203,7 +204,6 @@ R6::R6Class("IBWrap",
 
     positionEnd= function() {
         invisible(NULL)
-        ## message("done")
     },
 
     accountSummary= function(reqId, account, tag, value, currency) {
@@ -213,8 +213,7 @@ R6::R6Class("IBWrap",
     },
 
     accountSummaryEnd= function(reqId) {
-        NULL
-        ## message("accountSummaryEnd: done")
+        invisible(NULL)
     },
 
     verifyMessageAPI= function(apiData) warning("default 'verifyMessageAPI' implementation"),

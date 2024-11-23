@@ -1,3 +1,9 @@
+2024-11-23  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib.R (positions): no longer return
+        "AccountSummary" as an attribute
+        (positions): fix account for positions
+
 2024-11-22  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.R (positions): fetch cash balances and add
