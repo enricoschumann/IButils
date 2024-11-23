@@ -58,6 +58,14 @@ positions(port = 7496, clientId = 1)
 \examples{
 \donttest{
   positions()
+
+
+  ## fetch details for contract via ISIN + market
+  contr <- rib::Contract
+  contr$secIdType <- "ISIN"
+  contr$secId <- "DE0005557508"
+  contr$exchange <- "IBIS"
+  contr <- contract_details(contr)
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
