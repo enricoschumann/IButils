@@ -367,11 +367,8 @@ function(Symbol,
             colnames(res) <- cnames
 
             if (accumulate) {
-                if (is.null(all.data))
-                    all.data <- res
-                else
-                    all.data <- rbind(all.data,
-                                     res[!(res$timestamp %in% all.data$timestamp), ])
+                all.data <- rbind(res[!res$timestamp %in% all.data$timestamp, ],
+                                  all.data)
             }
 
             R <- range(res[["timestamp"]])
