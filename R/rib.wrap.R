@@ -28,8 +28,9 @@ R6::R6Class("IBWrap",
             self$Data$executions  <- list()
             self$Data$contracts   <- list()
             self$Data$commissionReport <- list()
-            self$Data$accountSummary   <- list()
+            self$Data$accountSummary <- list()
 
+            self$Data$headTimestamp  <- list()
             self$Data$historicalData <- list()
 
             self$Data$recentMessages <- list()
@@ -166,8 +167,10 @@ R6::R6Class("IBWrap",
     receiveFA= function(faDataType, xml) warning("default 'receiveFA' implementation"),
 
     historicalData= function(reqId, bar) {
-        self$Data$historicalData[[reqId]] <- bar
-        cat("historicalData:", reqId, "Rows:", nrow(self$Data$historicalData), "\n")
+        self$Data$historicalData[[as.character(reqId)]] <- bar
+        if (self$Settings$showMessages)
+            message("request id: ", reqId, "; received rows: ",
+                    nrow(self$Data$historicalData[[as.character(reqId)]]))
     },
 
     scannerParameters= function(xml) warning("default 'scannerParameters' implementation"),
@@ -264,7 +267,12 @@ R6::R6Class("IBWrap",
 
     historicalNewsEnd= function(requestId, hasMore) warning("default 'historicalNewsEnd' implementation"),
 
-    headTimestamp= function(reqId, headTimestamp) warning("default 'headTimestamp' implementation"),
+    headTimestamp= function(reqId, headTimestamp) {
+        self$Data$headTimestamp[[as.character(reqId)]] <- headTimestamp
+
+        ## message("headTimestamp ", headTimestamp)
+        ## warning("default 'headTimestamp' implementation")
+    },
 
     histogramData= function(reqId, data) warning("default 'histogramData' implementation"),
 

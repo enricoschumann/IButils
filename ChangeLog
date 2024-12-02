@@ -1,3 +1,15 @@
+2024-12-01  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/ib_hist_data.R (ib_hist_data): default for argument
+        "whatToShow" is "TRADES"
+        (ib_hist_data): default for argument "backend" is "rib"
+        (ib_hist_data): default for argument "filename" is
+        "%id%__%start%__%end%", i.e. two underscores are used
+        (ib_hist_data): new argument "filename.datetime.fmt"
+
+        * R/rib.wrap.R (headTimestamp): save data in
+        'self$Data$headTimestamp'
+
 2024-11-23  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.R (positions): no longer return

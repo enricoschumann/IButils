@@ -9,11 +9,16 @@
 \packageDescription{IButils}
 }
 \details{
-  The package contains functions to download historical data from IB.
+
+  Functionality for the \acronym{TWS} \acronym{API}; for
+  instance, for downloading historical data or retrieving
+  current positions.
+
+
 }
 \author{
 \packageAuthor{IButils}
 
 Maintainer: \packageMaintainer{IButils}
 }
-\keyword{ package }
+\keyword{package}

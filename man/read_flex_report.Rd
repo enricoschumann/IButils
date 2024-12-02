@@ -11,7 +11,7 @@ read_flex_report(file,
                  date.format = "yyyy-MM-dd",
                  time.format = "HH:mm:ss",
                  date.time.separator = ",",
-                 \dots)
+                 \dots, fill = FALSE)
 }
 \arguments{
   \item{file}{
@@ -28,6 +28,9 @@ read_flex_report(file,
   }
   \item{\dots}{
     additional settings
+  }
+  \item{fill}{
+    logical; see \code{\link{read.table}}
   }
 
 }

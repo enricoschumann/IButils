@@ -7,7 +7,7 @@ function(Symbol,
          directory,
          barSize,
          durationStr = NULL,
-         whatToShow,
+         whatToShow = "TRADES",
          start = as.POSIXct(Sys.Date() - 30), ## POSIXct
          end   = Sys.time(),                  ## POSIXct
          useRTH = FALSE,
@@ -19,19 +19,39 @@ function(Symbol,
          accumulate = FALSE,
          port = 7496,
          sep = ",",
-         filename = "%id%_%start%_%end%",
-         backend = NULL,
+         filename = "%id%__%start%__%end%",
+         filename.datetime.fmt = identity,
+         backend = "rib",
          clientId = NULL) {
+
+    t.type <- "POSIXct"
+    if (grepl("day", barSize))
+        t.type <- "Date"
 
     if (!dir.exists(directory))
         stop(sQuote("directory"), " does not exist")
 
-    all_files <- NULL
+    all.files <- NULL
+    all.data <- NULL
+
+    if (is.character(start)) {
+        ## TODO transform date to posix
+        start <- as.POSIXct(start)
+    }
+
+    if (is.character(end))
+        ## TODO transform date to posix
+        end <- as.POSIXct(end)
+
     if (end < start)
         stop("end < start")
 
     if (is.null(id))
-        id <- paste0(Symbol, Security_Type, Exchange, Currency, collapse = "-")
+        id <- paste0(if (!is.null(Symbol)) Symbol,
+                     if (!is.null(Security_Type)) Security_Type,
+                     if (!is.null(Exchange)) Exchange,
+                     if (!is.null(Currency)) Currency,
+                     collapse = "-")
 
     if (barSize == "5 min") {
         if (verbose)
@@ -47,6 +67,8 @@ function(Symbol,
             durationStr <- "5 D"
         } else if (barSize  == "1 secs") {
             durationStr <- "2000 S"
+        } else if (barSize  == "1 day") {
+            durationStr <- "68 Y"
         } else {
             if (is.null(durationStr))
                 stop("duration not specified")
@@ -88,7 +110,7 @@ function(Symbol,
         t <- start
 
         if (accumulate)
-            all_data <- NULL
+            all.data <- NULL
 
         while (t < end) {
 
@@ -173,11 +195,11 @@ function(Symbol,
                 colnames(data) <- cnames
 
                 if (accumulate) {
-                    all_data <- if (is.null(all_data))
+                    all.data <- if (is.null(all.data))
                                     data
                                 else
-                                    rbind(all_data,
-                                          data[!(data$timestamp %in% all_data$timestamp), ])
+                                    rbind(all.data,
+                                          data[!(data$timestamp %in% all.data$timestamp), ])
                 }
 
                 fn0 <- fill_in(filename,
@@ -194,7 +216,7 @@ function(Symbol,
                             file = fn)
 
             }
-            all_files <- c(all_files, fn)
+            all.files <- c(all.files, fn)
 
             if (.POSIXct(max(times)) >= end)
                 break
@@ -203,14 +225,36 @@ function(Symbol,
                 Sys.sleep(10L)
         }
         if (accumulate)
-            all_data
+            all.data
         else
-            all_files
+            all.files
 
 
     } else if (tolower(backend) == "rib") {
 
-        end0 <- end
+        .fdt <- function(s, tz = NULL, t.type = "POSIXct") {
+
+            if (t.type == "POSIXct") {
+                s <- .POSIXct(s)
+                if (is.character(s)) {
+                    if (is.null(tz))
+                        t <- as.POSIXlt(s)
+                    else if (tz == "UTC") {
+                        t <- as.POSIXlt(s, tz = "UTC")
+                    }
+                } else
+                    t <- s
+                t <- as.POSIXct(t)
+                t.utc <- as.POSIXlt(t, tz = "UTC")
+            } else if (t.type == "Date") {
+                t.utc <- strptime(paste(.Date(s), "235959"),
+                                  tz = "UTC",
+                                  format = "%Y-%m-%d %H%M%S")
+            }
+
+            format(t.utc, "%Y%m%d-%H:%M:%S")
+        }
+
 
         if (is.list(Symbol))
             contract <- Symbol
@@ -222,111 +266,161 @@ function(Symbol,
 
         contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
 
-        H <- NULL
-        wrap <- IBWrapHistData$new()
+        wr <- .wrap$new(showMessages = TRUE)
         ic <- rib::IBClient$new()
+
         cid <- if (is.null(clientId))
-                   sample(1e8, size = 1) else clientId
+                   sample(1e7, size = 1) else clientId
         ic$connect(port = port, clientId = cid)
+        ic$checkMsg(wr)
         on.exit(ic$disconnect())
 
-        wait <- 0.2
-        ic$checkMsg(wrap, timeout = wait)
 
-        tickerId <- 1
+        tickerId <- "1"
         ic$reqHeadTimestamp(tickerId = tickerId,
                             contract = contract,
                             whatToShow = whatToShow,
                             useRTH = useRTH,
                             formatDate = "2")
-        while (!ic$checkMsg(wrap, timeout = wait)) {
+        while (!ic$checkMsg(wr, timeout = 0.5))
             Sys.sleep(0.1)
+
+        head <- .POSIXct(as.numeric(wr$Data$headTimestamp[["1"]]))
+        if (length(head) && start < head) {
+            message("start changed to ", head)
+            start <- head
         }
-        earliest <- as.numeric(wrap$context$headTimestamp)
-        if (is.null(start))
-            start <- earliest
 
-        if (verbose)
-            message("Data available back to ", as.character(.POSIXct(earliest)))
-        while (start < end) {
-            ## end <- as.POSIXct("2020-02-20 16:00:00", tz = "UTC")
+        if (t.type == "Date") {
+            start <- as.Date(as.POSIXlt(start))
+            start <- unclass(start)
 
-            end <- format(end, "%Y%m%d %H:%M:%S")
+            end   <- as.Date(as.POSIXlt(end))
+            end   <- unclass(end)
 
-            ic$reqHistoricalData(tickerId,
-                                 contract,
-                                 endDateTime = end,
+        } else if (t.type == "POSIXct") {
+            ## start/end become numeric, eg 1731312000
+            start <- c(unclass(start))
+            end   <- c(unclass(end))
+
+        }
+
+
+        end1 <- end
+        while (end1 > start) {
+
+            endDateTime <- .fdt(end1, t.type = t.type)
+
+            rid <- sample.int(1e7, size = 1)
+            ic$reqHistoricalData(as.character(rid),
+                                 contract = contract,
+                                 endDateTime = endDateTime,
+                                 formatDate = 2,
                                  durationStr = durationStr,
-                                 barSizeSetting = barSize,
-                                 whatToShow = whatToShow,
+                                 barSize = barSize,
                                  useRTH = useRTH,
-                                 formatDate = "2",
-                                 keepUpToDate = FALSE)
+                                 keepUpToDate = FALSE,
+                                 whatToShow = whatToShow)
 
-            while (!ic$checkMsg(wrap, timeout = wait)) {
-                Sys.sleep(0.1)
+            n <- ic$checkMsg(wr, timeout = 0.5)
+            res <- wr$Data$historicalData[[as.character(rid)]]
+
+            done <- !is.null(res)
+            try.start <- Sys.time()
+            while (!done) {
+                message("no data: wait")
+                Sys.sleep(0.5)
+                n <- ic$checkMsg(wr, timeout = 0.5)
+                res <- wr$Data$historicalData[[as.character(rid)]]
+                if (as.numeric(Sys.time() - try.start, units = "secs") > 30) {
+                    break
+                }
             }
-            h0 <- wrap$context$historical
-            if (accumulate && !is.null(H[, "timestamp"]))
-                h0 <- h0[h0$time < min(H[, "timestamp"]), ]
+
+
+            if (is.null(res)) {
+                message("no data received")
+                break
+            }
+
+            ## returned timestamp is character:
+            ## transform to numeric
+            if (t.type == "POSIXct") {
+                res$time <- as.numeric(res$time)
+            } else if (t.type == "Date") {
+                res$time <- unclass(as.Date(res$time, format = "%Y%m%d"))
+            }
+            end1 <- min(res$time)
 
             if (whatToShow == "TRADES") {
+                res <- res[ , 1:8, drop = FALSE]
                 cnames <- c("timestamp", "open", "high", "low", "close",
                             "volume", "vwap", "count")
             } else if (whatToShow == "MIDPOINT" ||
                        whatToShow == "BID" ||
                        whatToShow == "ASK" ) {
-                h0 <- h0[ , 1:5, drop = FALSE]
+                res <- res[ , 1:5, drop = FALSE]
                 cnames <- c("timestamp", "open", "high", "low", "close")
             } else
                 stop("unknown ibpricetype")
 
-            h0[[1L]] <- as.numeric(h0[[1L]])
-            h0 <- as.matrix(h0)
-            colnames(h0) <- cnames
+            colnames(res) <- cnames
 
-            fn0 <- fill_in(filename,
-                           id = id,
-                           start = min(h0[, 1L]),
-                           end   = max(h0[, 1L]),
-                           whatToShow = whatToShow,
+            if (accumulate) {
+                if (is.null(all.data))
+                    all.data <- res
+                else
+                    all.data <- rbind(all.data,
+                                     res[!(res$timestamp %in% all.data$timestamp), ])
+            }
 
-                           delim = c("%", "%"))
+            R <- range(res[["timestamp"]])
+            start.label <- filename.datetime.fmt(R[1])
+            end.label   <- filename.datetime.fmt(R[2])
+            fn1 <- textutils::fill_in(filename,
+                                      id = id,
+                                      start = start.label,
+                                      end   = end.label,
+                                      whatToShow = whatToShow,
+                                      delim = c("%", "%"))
+            all.files <- c(all.files, fn1)
 
-            fn <- file.path(directory, fn0)
-            all_files <- c(all_files, fn)
-
-            write.table(h0,
+            write.table(res,
                         sep = sep,
                         row.names = FALSE,
                         col.names = TRUE,
-                        file = fn)
-            if (accumulate)
-                H <- rbind(h0, H)
+                        quote = FALSE,
+                        file = file.path(directory, fn1))
 
-            end <- .POSIXct(min(h0[, 1L]))
-            message("==> received data back to ", as.character(end))
 
-            if (min(h0[, 1L]) <= earliest || min(h0[, 1L]) <= start)
+            if (end1 <= start)
                 break
 
-            if (do.wait)
-                Sys.sleep(10L)
-
+            Sys.sleep(14)
+            ic$checkMsg(wr)
         }
 
         if (accumulate) {
-            ## FIXME: transform to data.frame?
-            ## H$time <- .POSIXct(as.numeric(H[, "timestamp"]))
             if (trim) {
-                H <- H[H[, "timestamp"] >= start &
-                       H[, "timestamp"] >= end0, ]
+                all.data <-
+                    all.data[all.data$timestamp >= start &
+                             all.data$timestamp <= end, , drop = FALSE]
             }
-            H
-        } else {
-            all_files
+            if (t.type == "POSIXct") {
+                all.data$timestamp <- .POSIXct(all.data$timestamp)
+
+            } else if (t.type == "Date") {
+                all.data$timestamp <-
+                    .Date(all.data$timestamp)
+
+            }
         }
     }
+
+    if (accumulate)
+        all.data
+    else
+        all.files
 }
 
 combine_files <- function(directory,
