@@ -1,5 +1,8 @@
 2024-12-03  Enrico Schumann  <es@enricoschumann.net>
 
+        * R/ib_hist_data.R (combine_files): no longer
+        'setwd' to source directory
+
         * R/rib.wrap.R (error): add argument 'errorTime'
         (orderBound): rename arguments to 'permId',
         'clientId', 'orderId'

@@ -255,7 +255,6 @@ function(Symbol,
             format(t.utc, "%Y%m%d-%H:%M:%S")
         }
 
-
         if (is.list(Symbol))
             contract <- Symbol
         else
@@ -274,7 +273,6 @@ function(Symbol,
         ic$connect(port = port, clientId = cid)
         ic$checkMsg(wr)
         on.exit(ic$disconnect())
-
 
         tickerId <- "1"
         ic$reqHeadTimestamp(tickerId = tickerId,
@@ -305,7 +303,6 @@ function(Symbol,
 
         }
 
-
         end1 <- end
         while (end1 > start) {
 
@@ -327,9 +324,11 @@ function(Symbol,
 
             done <- !is.null(res)
             try.start <- Sys.time()
-            while (!done) {
+            i <- 0
+            while (!done && i < 10) {
                 message("no data: wait")
-                Sys.sleep(0.5)
+                Sys.sleep(i)
+                i <- i + 1
                 n <- ic$checkMsg(wr, timeout = 0.5)
                 res <- wr$Data$historicalData[[as.character(rid)]]
                 if (as.numeric(Sys.time() - try.start, units = "secs") > 30) {
@@ -420,6 +419,7 @@ function(Symbol,
         all.files
 }
 
+
 combine_files <- function(directory,
                           max.rows = -1,
                           pattern = NULL,
@@ -427,11 +427,8 @@ combine_files <- function(directory,
                           prefix = "processed___",
                           delete.processed = FALSE,
                           actual.timestamp = FALSE,
-                          sep = ",") {
-
-    cwd <- getwd()
-    setwd(directory)
-    on.exit(setwd(cwd))
+                          sep = ",",
+                          id.rx = "(.*)__[0-9]+__[0-9]+$") {
 
     filenames <- list.files(directory,
                             full.names = FALSE,
@@ -442,7 +439,7 @@ combine_files <- function(directory,
                     pattern = paste0("^", prefix))
         filenames <- setdiff(filenames, excl)
     }
-    symbols <- gsub("(.*)_[0-9]+_[0-9]+$", "\\1", filenames)
+    symbols <- gsub(id.rx, "\\1", filenames)
     symbols <- sort(unique(symbols))
     alldata <- NULL
 
@@ -451,16 +448,19 @@ combine_files <- function(directory,
         files <- filenames[grep(s, filenames)]
         for (f in files) {
             if (verbose)
-                message("processing ", f, appendLF=FALSE)
+                message("processing ", f, appendLF = FALSE)
 
-            if (length(readLines(f, n = 2)) < 2) {
+            len <- length(readLines(file.path(directory, f), n = 2))
+            if (len < 2L) {
                 if (verbose)
                     message(" ... skipped (empty file) ... OK")
                 next
             }
-            data <- read.table(f, header = TRUE, sep = sep, stringsAsFactors=FALSE)
+            data <- read.table(file.path(directory, f),
+                               header = TRUE, sep = sep,
+                               stringsAsFactors = FALSE)
             if (!is.null(alldata))
-                data <- data[data[["timestamp"]] > max(alldata[["timestamp"]]), ]
+                data <- data[!data[["timestamp"]] %in% alldata[["timestamp"]], ]
             alldata <- rbind(alldata, data)
             if (verbose)
                 message(" ... OK ")
@@ -469,16 +469,16 @@ combine_files <- function(directory,
         ran <- if (actual.timestamp)
                    range(alldata$timestamp)
                else
-                   range(as.numeric(c(gsub(".*_([0-9]+)_[0-9]+$", "\\1", files),
-                                      gsub(".*_[0-9]+_([0-9]+)$", "\\1", files))))
-        outfile <- paste0(s, "_", paste(ran, collapse = "_"))
+                   range(as.numeric(c(gsub(".*__([0-9]+)__[0-9]+$", "\\1", files),
+                                      gsub(".*__[0-9]+__([0-9]+)$", "\\1", files))))
+        outfile <- paste0(s, "__", paste(ran, collapse = "__"))
         if (verbose)
             message("===> write combined file ", outfile, appendLF = FALSE)
         write.table(alldata,
                     sep = sep,
                     row.names = FALSE,
                     col.names = TRUE,
-                    file = outfile)
+                    file = file.path(directory, outfile))
         if (verbose)
             message(" ... OK")
         if (verbose)
@@ -487,13 +487,17 @@ combine_files <- function(directory,
             if (outfile %in% files)
                 files <- setdiff(files, outfile)
             if (length(files))
-                file.rename(files, paste0(prefix, files))
+                file.rename(file.path(directory, files),
+                            file.path(directory, paste0(prefix, files)))
         }
+
         if (verbose)
             message(" ... OK")
     }
+
     alldata
 }
+
 
 
 latest_timestamp <- function(directory, id) {
@@ -504,6 +508,8 @@ latest_timestamp <- function(directory, id) {
                   NA
     latest
 }
+
+
 
 flex_web_service <- function(file, token, query,
                              version = 3, delay = 2,
@@ -558,6 +564,7 @@ flex_web_service <- function(file, token, query,
         cat(res, sep = "\n")
         ans <- 1
     }
+
     if (do.copy)
         file.copy(tmp, file, overwrite = TRUE)
     invisible(ans)

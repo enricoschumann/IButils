@@ -579,7 +579,7 @@ contract_details <- function(localSymbol,
 
     ic   <- rib::IBClient$new()
 
-    msg1 <- capture.output(ic$connect(port = port, clientId = clientId))
+    msg1 <- ic$connect(port = port, clientId = clientId)
     on.exit(ic$disconnect())
     n <- ic$checkMsg(wrap)
     while (n > 0) {
@@ -602,7 +602,7 @@ contract_details <- function(localSymbol,
     }
 
     msg <- as.data.frame(do.call(rbind, wrap$Data$recentMessages))
-    colnames(msg) <- c("id", "errorCode",
+    colnames(msg) <- c("id", "errorTime", "errorCode",
                        "errorString", "advancedOrderRejectJson")
     attr(ans, "messages") <- msg
     ans

@@ -127,8 +127,6 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   The package uses functionality of either package \pkg{IBrokers}
   or \pkg{rib}, depending on the setting of backend.
 
-
-
 }
 \value{
 
@@ -136,13 +134,16 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   of the retrieved data.  If \code{accumulate} is \code{FALSE}
   (the default), a character vector: the names of the file
   (including the directory) that have been saved.
+  Files are written in tsdb format.
   
 }
 \author{
   Enrico Schumann
 }
 \seealso{
-  \code{\link[IBrokers]{reqHistoricalData}}
+
+  \code{\link{combine_file}} for aggregating files
+
 }
 \examples{
 \dontrun{
