@@ -14,7 +14,9 @@
 \usage{
 executions(port = 7496, clientId = 1)
 order_status(port = 7496, clientId = 1)
-positions(port = 7496, clientId = 1)
+positions(port = 7496, clientId = 1,
+          contractFields = c("conId", "localSymbol", "currency"),
+          verbose = TRUE)
 }
 \arguments{
   \item{port}{

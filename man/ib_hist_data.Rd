@@ -16,6 +16,7 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
              verbose = TRUE, trim = TRUE, accumulate = FALSE,
              port = 7496, sep = ",",
              filename = "\%id\%__\%start\%__\%end\%",
+             filename.datetime.fmt = identity,
              backend = "rib",
              clientId = NULL)
 }
@@ -23,78 +24,78 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   \item{Symbol}{
     character
   }
-  
+
   \item{Security_Type}{
     character
   }
-  
+
   \item{Exchange}{
     character
   }
-  
+
   \item{Currency}{
     character
   }
-  
+
   \item{id}{
     character; optional: the prefix for text files. If NULL, Symbol
     etc. are pasted together
   }
-  
+
   \item{directory}{
     character: the directory in which the files are stored
   }
-  
+
   \item{barSize}{
     character
   }
-  
+
   \item{durationStr}{
     character. If NULL, the function attempts to set a long
     duration. (This argument may be removed in the future since it
     rarely makes sense to set it explicitly.)
   }
-  
+
   \item{whatToShow}{
     character: TRADES, MIDPOINT, BID or ASK
   }
-  
+
   \item{start}{
     POSIXct
   }
-  
+
   \item{end}{
     POSIXct
   }
-  
+
   \item{useRTH}{
     logical
   }
-  
+
   \item{skip.from}{
     character
   }
-  
+
   \item{skip.until}{
     character
   }
-  
+
   \item{skip.tz}{
     character
   }
-  
+
   \item{verbose}{
     logical
   }
-  
+
   \item{accumulate}{
     logical
   }
-  
+
   \item{trim}{
     logical
   }
-  
+
   \item{sep}{
     character: the column separator
   }
@@ -135,14 +136,14 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   (the default), a character vector: the names of the file
   (including the directory) that have been saved.
   Files are written in tsdb format.
-  
+
 }
 \author{
   Enrico Schumann
 }
 \seealso{
 
-  \code{\link{combine_file}} for aggregating files
+  \code{\link{combine_files}} for aggregating files
 
 }
 \examples{

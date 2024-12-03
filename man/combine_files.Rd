@@ -10,7 +10,7 @@
 combine_files(directory, max.rows = -1, pattern = NULL,
               verbose = TRUE, prefix = "processed___",
               delete.processed = FALSE, actual.timestamp = FALSE,
-              sep = ",")
+              sep = ",", id.rx = "(.*)__[0-9]+__[0-9]+$")
 }
 \arguments{
   \item{directory}{
