@@ -1,3 +1,9 @@
+2024-12-03  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib.wrap.R (error): add argument 'errorTime'
+        (orderBound): rename arguments to 'permId',
+        'clientId', 'orderId'
+
 2024-12-01  Enrico Schumann  <es@enricoschumann.net>
 
         * R/ib_hist_data.R (ib_hist_data): default for argument

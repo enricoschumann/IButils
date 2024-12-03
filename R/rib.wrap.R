@@ -128,10 +128,11 @@ R6::R6Class("IBWrap",
         ## cat("ExecDetailsEnd:", reqId, "\n")
     },
 
-    error= function(id, errorCode, errorString, advancedOrderRejectJson) {
+    error= function(id, errorTime, errorCode, errorString, advancedOrderRejectJson) {
         if (self$Settings$storeMessages) {
             n <- as.character(round(unclass(Sys.time()), 6))
             self$Data$recentMessages[[n]] <- list(id,
+                                                  errorTime,
                                                   errorCode,
                                                   errorString,
                                                   advancedOrderRejectJson)
@@ -300,7 +301,7 @@ R6::R6Class("IBWrap",
 
     tickByTickMidPoint= function(reqId, time, midPoint) warning("default 'tickByTickMidPoint' implementation"),
 
-    orderBound= function(orderId, apiClientId, apiOrderId) warning("default 'orderBound' implementation"),
+    orderBound= function(permId, clientId, orderId) warning("default 'orderBound' implementation"),
 
     completedOrder= function(contract, order, orderState) warning("default 'completedOrder' implementation"),
 
