@@ -14,33 +14,44 @@ combine_files(directory, max.rows = -1, pattern = NULL,
 }
 \arguments{
   \item{directory}{
-    character
-}
-  \item{max.rows}{
-    numeric
-}
+    string: where to read files
+  }
+  \item{max.rows}{%
+    
+    numeric: maximum number of rows to put into a single file;
+    currently ignored
+
+  }
   \item{pattern}{
-    character
-}
+    string: passed to \code{\link{list.files}}
+  }
   \item{verbose}{
     logical
-}
+  }
   \item{prefix}{
     character
-}
+  }
   \item{delete.processed}{
     logical
-}
-  \item{actual.timestamp}{
-    logical
   }
-  \item{sep}{
-    character: the column separator
-  }
+  \item{actual.timestamp}{%
 
+    logical: if \code{TRUE}, use the actual min/max timestamp
+    of the time-series in the name of the resulting file; if
+    \code{FALSE}, use the min/max from the input filenames
+    
+  }
+  \item{sep}{%
+
+    character: the column separator
+
+  }
 }
 \details{
-  Read CSV files and combine them into one large file per symbol.
+
+  Read \acronym{CSV} files and combine them into one large
+  file per symbol.
+
 }
 \value{
   a data.frame

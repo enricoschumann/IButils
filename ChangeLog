@@ -1,3 +1,10 @@
+2024-12-04  Enrico Schumann  <es@enricoschumann.net>
+
+        * man/*: update docs
+
+        * DESCRIPTION (Additional_repositories): remove
+        https://enricoschumann.net/R
+
 2024-12-03  Enrico Schumann  <es@enricoschumann.net>
 
         * R/ib_hist_data.R (combine_files): no longer
@@ -6,6 +13,8 @@
         * R/rib.wrap.R (error): add argument 'errorTime'
         (orderBound): rename arguments to 'permId',
         'clientId', 'orderId'
+
+        * DESCRIPTION (Suggests): add 'tsdb'
 
 2024-12-01  Enrico Schumann  <es@enricoschumann.net>
 

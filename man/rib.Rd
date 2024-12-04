@@ -6,61 +6,62 @@
 \title{
   Helper Functions for TWS
 }
-\description{
-  Several convenience functions for
-  connecting synchronously to the TWS.
+\description{%
+
+  Several convenience functions for connecting synchronously
+  to the TWS.
 
 }
-\usage{
+\usage{%
 executions(port = 7496, clientId = 1)
 order_status(port = 7496, clientId = 1)
 positions(port = 7496, clientId = 1,
           contractFields = c("conId", "localSymbol", "currency"),
           verbose = TRUE)
 }
-\arguments{
+\arguments{%
   \item{port}{
     integer
   }
   \item{clientId}{
     integer
+  }
 }
-}
-\details{
+\details{%
+
   The functions follow the same pattern: connect to the TWS,
   send requests, receive and process results, and disconnect.
   Results are typically arranged as data frames.
 
-  Warning: these functions are very experimental, and
+  \bold{Warning}: these functions are very experimental, and
   returned results may change.
 
 }
-\value{
+\value{%
 
-  A \code{\link{data.frame}}. If there are no executions, orders or
-  positions, the functions return \code{NULL} invisibly.
-
+  A \code{\link{data.frame}}. If there are no executions,
+  orders or positions, the functions return \code{NULL}
+  invisibly.
 
 }
-%% \references{
-%% %% ~put references to the literature/web site here ~
-%% }
+\references{%
+  \url{https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/}
+}
 \author{
   Enrico Schumann
 }
-%% \note{
-%% %%  ~~further notes~~
-%% }
-
-%% %% ~Make other sections like Warning with \section{Warning }{....} ~
-
-%% \seealso{
-%% %% ~~objects to See Also as \code{\link{help}}, ~~~
-%% }
+\seealso{
+  \code{\link{ib_hist_data}}
+}
 \examples{
 \donttest{
-  positions()
 
+  ## Functions require an account with Interactive Brokers
+  ## and a running TWS.
+
+  positions(port = 7496)
+
+  executions(port = 7496)
 
   ## fetch details for contract via ISIN + market
   contr <- rib::Contract
@@ -70,12 +71,3 @@ positions(port = 7496, clientId = 1,
   contr <- contract_details(contr)
 }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
-% \keyword{ ~kwd1 }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.
