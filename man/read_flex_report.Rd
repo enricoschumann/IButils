@@ -47,7 +47,7 @@ a list of data.frames
 
 }
 \references{
-  \url{https://www.interactivebrokers.com/en/software/am/am/reports/flex_web_service_version_3.htm}
+  \url{https://www.ibkrguides.com/clientportal/performanceandstatements/flex.htm}
 }
 \author{
   Enrico Schumann

@@ -1,8 +1,7 @@
-\name{positions}
+\name{rib}
 \alias{contract_details}
 \alias{executions}
 \alias{order_status}
-\alias{positions}
 \title{
   Helper Functions for TWS
 }
@@ -15,9 +14,6 @@
 \usage{%
 executions(port = 7496, clientId = 1)
 order_status(port = 7496, clientId = 1)
-positions(port = 7496, clientId = 1,
-          contractFields = c("conId", "localSymbol", "currency"),
-          verbose = TRUE)
 }
 \arguments{%
   \item{port}{
@@ -58,8 +54,6 @@ positions(port = 7496, clientId = 1,
 
   ## Functions require an account with Interactive Brokers
   ## and a running TWS.
-
-  positions(port = 7496)
 
   executions(port = 7496)
 

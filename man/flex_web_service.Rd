@@ -9,7 +9,7 @@
 \usage{
 flex_web_service(file, token, query, version = 3, delay = 2,
                  no.write.msg = TRUE, no.write.warn = TRUE,
-                 verbose = TRUE)
+                 verbose = TRUE, ...)
 }
 \arguments{
   \item{file}{
@@ -20,30 +20,29 @@ flex_web_service(file, token, query, version = 3, delay = 2,
 }
   \item{query}{
     integer
-}
+  }
   \item{version}{
     integer; currently only 3 is supported
-}
+  }
   \item{delay}{
     integer: number of seconds to wait between sending
     the token and retrieving the flex-data report
-}
+  }
   \item{no.write.msg}{
     logical: do not write file if it contains a message
-}
+  }
   \item{no.write.warn}{
     logical: do not write file if it contains a warning
-}
+  }
   \item{verbose}{
     logical: sets the 'quiet' argument of
     \code{\link{download.file}}
-}
+  }
 
 }
 \details{
 
-  Retrieve flex queries via
-  \code{\link{download.file}}.
+  Retrieve flex queries via \code{\link{download.file}}.
 
   The function also checks whether the downloaded file
   contains messages from IB (lines that start with
@@ -53,7 +52,7 @@ flex_web_service(file, token, query, version = 3, delay = 2,
 \value{
 
   The function is called for its side effect:
-  downloading and storing the flex query.
+  downloading and storing the results of a flex query.
 
   The function will first send \code{token} and
   \code{query} to IB. If the response does not contain
@@ -80,7 +79,7 @@ flex_web_service(file, token, query, version = 3, delay = 2,
 
 }
 \references{
-  \url{https://ibkrcampus.com/ibkr-api-page/flex-web-service/}
+  \url{https://www.interactivebrokers.com/campus/ibkr-api-page/flex-web-service/}
 }
 \author{
   Enrico Schumann
