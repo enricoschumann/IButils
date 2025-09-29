@@ -426,7 +426,7 @@ order_status <- function(port = 7496, clientId = 1) {
             do.call(rbind, lapply(wrap$Data$orders, `[[`, "contract")),
 
             do.call(rbind, lapply(wrap$Data$orders, `[[`, "order")),
-            do.call(rbind, lapply(wrap$Data$orders, `[[`, "orderstate"))
+            do.call(rbind, lapply(wrap$Data$orders, `[[`, "orderState"))
         )
         ans <- merge(x = ans1, ans2, by = 0,
                      suffixes = c(".order_status", ".open_orders"))

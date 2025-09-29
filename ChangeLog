@@ -1,3 +1,8 @@
+2025-09-29  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/rib.wrap.R (.wrap): update argument names, as
+        in package 'rib' v0.30.0
+
 2024-12-06  Enrico Schumann  <es@enricoschumann.net>
 
         * R/contracts.R: add function

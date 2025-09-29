@@ -1,7 +1,7 @@
-v0.4-0  (2024-12-01; not released yet)
+v0.4-0  (2025-09-29; not released yet)
 
   o functions that use "rib" now require a recent version
-    of that package (>=0.19.0)
+    of that package (>=0.30.0)
 
   o 'ib_hist_data': backend "rib" is now default, and
     it also supports daily bars

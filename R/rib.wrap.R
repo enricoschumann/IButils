@@ -40,21 +40,21 @@ R6::R6Class("IBWrap",
         },
 
 
-        tickPrice= function(tickerId, field, price, size, attrib) warning("default 'tickPrice' implementation"),
+        tickPrice= function(reqId, tickType, price, size, attrib) warning("default 'tickPrice' implementation"),
 
-        tickSize= function(tickerId, field, size) warning("default 'tickSize' implementation"),
+        tickSize= function(reqId, tickType, size) warning("default 'tickSize' implementation"),
 
-        tickOptionComputation= function(tickerId, tickType,
+        tickOptionComputation= function(reqId, tickType,
                                         tickAttrib, impliedVol,
                                         delta, optPrice, pvDividend,
                                         gamma, vega, theta, undPrice)
                                    warning("default 'tickOptionComputation' implementation"),
 
-        tickGeneric= function(tickerId, tickType, value) warning("default 'tickGeneric' implementation"),
+        tickGeneric= function(reqId, tickType, value) warning("default 'tickGeneric' implementation"),
 
-        tickString= function(tickerId, tickType, value) warning("default 'tickString' implementation"),
+        tickString= function(reqId, tickType, value) warning("default 'tickString' implementation"),
 
-        tickEFP= function(tickerId, tickType, basisPoints,
+        tickEFP= function(reqId, tickType, basisPoints,
                           formattedBasisPoints, totalDividends,
                           holdDays, futureLastTradeDate, dividendImpact,
                           dividendsToLastTradeDate)
@@ -68,12 +68,12 @@ R6::R6Class("IBWrap",
         },
 
 
-        openOrder= function(orderId, contract, order, orderstate) {
+        openOrder= function(orderId, contract, order, orderState) {
             self$Data$orders[[as.character(order$permId)]] <-
                 list(orderId = orderId,
                      contract = contract,
                      order = order,
-                     orderstate = orderstate)
+                     orderState = orderState)
             if (self$Settings$showMessages)
                 message("order ", orderId, ": added to/updated in Data$orders")
         },
@@ -84,8 +84,8 @@ R6::R6Class("IBWrap",
 
         #    connectionClosed= function() warning("default implementation"),
 
-        updateAccountValue= function(key, val, currency, accountName) {
-            v <- list(key = key, value = val, currency = currency, accountName = accountName)
+        updateAccountValue= function(key, value, currency, accountName) {
+            v <- list(key = key, value = value, currency = currency, accountName = accountName)
             self$Data$accountData <-
                 c(self$Data$accountData, v)
         },
@@ -96,7 +96,7 @@ R6::R6Class("IBWrap",
 
         },
 
-        updateAccountTime= function(timeStamp) {
+        updateAccountTime= function(timestamp) {
             invisible(NULL)
         },
 
@@ -146,9 +146,9 @@ R6::R6Class("IBWrap",
                 "|", format(errorCode, width = 6), ": ", errorString, "\n")
     },
 
-    updateMktDepth= function(id, position, operation, side, price, size) warning("default 'updateMktDepth' implementation"),
+    updateMktDepth= function(reqId, position, operation, side, price, size) warning("default 'updateMktDepth' implementation"),
 
-    updateMktDepthL2= function(id, position, marketMaker, operation, side, price, size, isSmartDepth) warning("default 'updateMktDepthL2' implementation"),
+    updateMktDepthL2= function(reqId, position, marketMaker, operation, side, price, size, isSmartDepth) warning("default 'updateMktDepthL2' implementation"),
 
     updateNewsBulletin= function(msgId, msgType, newsMessage, originExch) warning("default 'updateNewsBulletin' implementation"),
 
@@ -167,8 +167,8 @@ R6::R6Class("IBWrap",
 
     receiveFA= function(faDataType, xml) warning("default 'receiveFA' implementation"),
 
-    historicalData= function(reqId, bar) {
-        self$Data$historicalData[[as.character(reqId)]] <- bar
+    historicalData= function(reqId, bars) {
+        self$Data$historicalData[[as.character(reqId)]] <- bars
         if (self$Settings$showMessages)
             message("request id: ", reqId, "; received rows: ",
                     nrow(self$Data$historicalData[[as.character(reqId)]]))
@@ -176,7 +176,7 @@ R6::R6Class("IBWrap",
 
     scannerParameters= function(xml) warning("default 'scannerParameters' implementation"),
 
-    scannerData= function(reqId, rank, contractDetails, distance, benchmark, projection, legsStr) warning("default 'scannerData' implementation"),
+    scannerData= function(reqId, data) warning("default 'scannerData' implementation"),
 
     realtimeBar= function(reqId, time, open, high, low, close,
                           volume, wap, count) {
@@ -254,19 +254,19 @@ R6::R6Class("IBWrap",
 
     mktDepthExchanges= function(depthMktDataDescriptions) warning("default 'mktDepthExchanges' implementation"),
 
-    tickNews= function(tickerId, timeStamp, providerCode, articleId, headline, extraData) warning("default 'tickNews' implementation"),
+    tickNews= function(tickerId, timestamp, providerCode, articleId, headline, extraData) warning("default 'tickNews' implementation"),
 
-    smartComponents= function(reqId, theMap) warning("default 'smartComponents' implementation"),
+    smartComponents= function(reqId, map) warning("default 'smartComponents' implementation"),
 
-    tickReqParams= function(tickerId, minTick, bboExchange, snapshotPermissions) warning("default 'tickReqParams' implementation"),
+    tickReqParams= function(reqId, minTick, bboExchange, snapshotPermissions) warning("default 'tickReqParams' implementation"),
 
     newsProviders= function(newsProviders) warning("default 'newsProviders' implementation"),
 
-    newsArticle= function(requestId, articleType, articleText) warning("default 'newsArticle' implementation"),
+    newsArticle= function(reqId, articleType, articleText) warning("default 'newsArticle' implementation"),
 
-    historicalNews= function(requestId, time, providerCode, articleId, headline) warning("default 'historicalNews' implementation"),
+    historicalNews= function(reqId, time, providerCode, articleId, headline) warning("default 'historicalNews' implementation"),
 
-    historicalNewsEnd= function(requestId, hasMore) warning("default 'historicalNewsEnd' implementation"),
+    historicalNewsEnd= function(reqId, hasMore) warning("default 'historicalNewsEnd' implementation"),
 
     headTimestamp= function(reqId, headTimestamp) {
         self$Data$headTimestamp[[as.character(reqId)]] <- headTimestamp
@@ -279,15 +279,15 @@ R6::R6Class("IBWrap",
 
     historicalDataUpdate= function(reqId, bar) warning("default 'historicalDataUpdate' implementation"),
 
-    rerouteMktDataReq= function(reqId, conid, exchange) warning("default 'rerouteMktDataReq' implementation"),
+    rerouteMktDataReq= function(reqId, conId, exchange) warning("default 'rerouteMktDataReq' implementation"),
 
-    rerouteMktDepthReq= function(reqId, conid, exchange) warning("default 'rerouteMktDepthReq' implementation"),
+    rerouteMktDepthReq= function(reqId, conId, exchange) warning("default 'rerouteMktDepthReq' implementation"),
 
     marketRule= function(marketRuleId, priceIncrements) warning("default 'marketRule' implementation"),
 
     pnl= function(reqId, dailyPnL, unrealizedPnL, realizedPnL) warning("default 'pnl' implementation"),
 
-    pnlSingle= function(reqId, pos, dailyPnL, unrealizedPnL, realizedPnL, value) warning("default 'pnlSingle' implementation"),
+    pnlSingle= function(reqId, position, dailyPnL, unrealizedPnL, realizedPnL, value) warning("default 'pnlSingle' implementation"),
 
     historicalTicks= function(reqId, ticks, done) warning("default 'historicalTicks' implementation"),
 
@@ -299,7 +299,7 @@ R6::R6Class("IBWrap",
 
     tickByTickBidAsk= function(reqId, time, bidPrice, askPrice, bidSize, askSize, attribs) warning("default 'tickByTickBidAsk' implementation"),
 
-    tickByTickMidPoint= function(reqId, time, midPoint) warning("default 'tickByTickMidPoint' implementation"),
+    tickByTickMidPoint= function(reqId, time, price) warning("default 'tickByTickMidPoint' implementation"),
 
     orderBound= function(permId, clientId, orderId) warning("default 'orderBound' implementation"),
 
@@ -307,14 +307,19 @@ R6::R6Class("IBWrap",
 
     completedOrdersEnd= function() warning("default 'completedOrdersEnd' implementation"),
 
-    replaceFAEnd= function(reqId, text) warning("default 'replaceFAEnd' implementation"),
+    replaceFAEnd= function(reqId, data) warning("default 'replaceFAEnd' implementation"),
 
-    wshMetaData= function(reqId, dataJson) warning("default 'wshMetaData' implementation"),
+    wshMetaData= function(reqId, data) warning("default 'wshMetaData' implementation"),
 
-    wshEventData= function(reqId, dataJson) warning("default 'wshEventData' implementation"),
+    wshEventData= function(reqId, data) warning("default 'wshEventData' implementation"),
 
     historicalSchedule= function(reqId, startDateTime, endDateTime, timeZone, sessions) warning("default 'historicalSchedule' implementation"),
 
-    userInfo= function(reqId, whiteBrandingId) warning("default 'userInfo' implementation")
-  )
+    userInfo= function(reqId, whiteBrandingId) warning("default 'userInfo' implementation"),
+
+    historicalDataEnd= function(reqId, startDate, endDate) warning("default 'historicalDataEnd' implementation"),
+
+    currentTimeInMillis= function(timeInMillis) warning("default 'currentTimeInMillis' implementation")
+
+    )
 )
