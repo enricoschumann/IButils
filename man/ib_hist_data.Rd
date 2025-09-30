@@ -23,7 +23,12 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
 }
 \arguments{
   \item{Symbol}{
-    character
+
+    character: the local symbol; can also be a contract
+    (a list, see \code{\link[rib]{IBContract}}), in
+    which case \code{Security_Type}, \code{Exchange} and
+    \code{Currency} are ignored
+
   }
 
   \item{Security_Type}{
@@ -39,8 +44,10 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   }
 
   \item{id}{
-    character; optional: the prefix for text files. If NULL, Symbol
-    etc. are pasted together
+
+    character; optional: the prefix for text files.
+    If \code{NULL}, Symbol etc. are pasted together.
+
   }
 
   \item{directory}{
@@ -52,9 +59,10 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   }
 
   \item{durationStr}{
-    character. If NULL, the function attempts to set a long
-    duration. (This argument may be removed in the future since it
-    rarely makes sense to set it explicitly.)
+
+    character. If \code{NULL}, the function attempts to
+    set a reasonably-long duration.
+
   }
 
   \item{whatToShow}{
@@ -106,7 +114,7 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   }
 
   \item{sep}{
-    character: the column separator
+    character: the column separator, defaults to a comma.
   }
 
   \item{port}{
@@ -131,16 +139,19 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
 
 }
 \details{
-  See IB API documentation \url{https://interactivebrokers.github.io/}
-  The package uses functionality of either package \pkg{IBrokers}
-  or \pkg{rib}, depending on the setting of backend.
 
-  The function tries to download the data between end and start,
-  beginning at the end, and fetching chunks of data defined by
-  \code{durationStr}. See
+  See IB API documentation
+  \url{https://interactivebrokers.github.io/} The package
+  uses functionality of either package \pkg{IBrokers} or
+  \pkg{rib}, depending on the setting of backend.
+
+  The function tries to download the data between end and
+  start, beginning at the end, and fetching chunks of data
+  defined by \code{durationStr}. See
   \url{https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/#duration-per-bar}.
 
-  Each chunk is stored, per default, as a flat file in CSV format.
+  Each chunk is stored, per default, as a flat file in CSV
+  format.
 
 
 }
