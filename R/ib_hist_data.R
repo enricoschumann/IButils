@@ -418,7 +418,7 @@ function(Symbol,
 
             if (accumulate) {
                 good <- !T %in% all.T
-                M <- rbind(M[good, ], all.data)
+                all.data <- rbind(M[good, ], all.data)
                 all.T <- c(T[good], all.T)
             }
 
@@ -449,10 +449,11 @@ function(Symbol,
         }
 
         if (accumulate) {
-            if (trim)
-                all.data <-
-                    all.data[all.T >= start &
-                             all.T <= end, , drop = FALSE]
+            if (trim) {
+                good <- all.T >= start & all.T <= end
+                all.data <- all.data[good, , drop = FALSE]
+                all.T <- all.T[good]
+            }
 
             if (t.type == "POSIXct") {
                 all.T <- .POSIXct(all.T)
