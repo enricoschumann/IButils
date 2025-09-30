@@ -8,7 +8,8 @@ export(
     positions,
     order_status,
     executions,
-    contract_details
+    contract_details,
+    contract_by_ISIN
     )
 
 

@@ -30,13 +30,13 @@ function(file,
     for (a in seq_len(nrow(accounts))) {
         A <- txt[seq(accounts$start[[a]] + 1,
                      accounts$end  [[a]] - 1)]
-        
+
         sections <- grep("^.?BOS", A)
         if (length(sections)) {
             ends <- grep("^.?EOS", A)
             N <- as.character(accounts[[2L]][a])
             ans[[N]] <- list()
-            
+
             for (s in seq_along(sections)) {
                 sec.title <- read.table(
                     text = A[sections[s]],

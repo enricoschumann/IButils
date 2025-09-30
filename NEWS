@@ -1,16 +1,23 @@
-v0.4-0  (2025-09-29; not released yet)
+v0.4-0  (2025-09-30; not released yet)
 
   o functions that use "rib" now require a recent version
-    of that package (>=0.30.0)
+    of that package (>=0.30.0), which depends on package
+    "RProtoBuf"
 
   o 'ib_hist_data': backend "rib" is now default, and
-    it also supports daily bars
+    it also supports daily bars. The code for backend
+    "ibrokers" remains in the function, but will issue a
+    warning. (Package "IBrokers" seems, unfortunately, to
+    be not actively maintained any more.)
 
   o 'ib_hist_data': argument "trim" is no longer ignored
     when backend is "rib"
 
   o 'contract_details' is more flexible, e.g. allows
-    fetch contract data based on ISINs
+    fetch contract data based on ISINs. There is also a
+    utility function 'contract_by_ISIN', primarily for
+    equities, that creates a contract from ISIN and
+    Exchange.
 
   o 'positions' includes cash balances
 

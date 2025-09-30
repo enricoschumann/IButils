@@ -17,7 +17,7 @@ combine_files(directory, max.rows = -1, pattern = NULL,
     string: where to read files
   }
   \item{max.rows}{%
-    
+
     numeric: maximum number of rows to put into a single file;
     currently ignored
 
@@ -39,7 +39,7 @@ combine_files(directory, max.rows = -1, pattern = NULL,
     logical: if \code{TRUE}, use the actual min/max timestamp
     of the time-series in the name of the resulting file; if
     \code{FALSE}, use the min/max from the input filenames
-    
+
   }
   \item{sep}{%
 

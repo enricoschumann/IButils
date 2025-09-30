@@ -1,4 +1,4 @@
-contracts_by_ISIN <-
+contract_by_ISIN <-
 function(ISIN, exchange,
          port = 7496, clientId = 1,
          verbose = FALSE,
@@ -8,17 +8,22 @@ function(ISIN, exchange,
         warning("package ", sQuote("rib"), " is not available")
         return(invisible(NULL))
     }
-    
+
     mL <- max(length(ISIN), length(exchange))
 
     ISIN <- rep(ISIN, mL/length(ISIN))
     exchange <- rep(exchange, mL/length(exchange))
 
-    wrap <- IButils:::.wrap$new(storeMessages = TRUE,
+    wrap <- .wrap$new(storeMessages = TRUE,
                                 showMessages = verbose)
-    ic <- IBClient$new()
+    ic <- rib::IBClient$new()
 
-    ic$connect(port = port, clientId = clientId)
+    if (verbose) {
+        ic$connect(port = port, clientId = clientId)
+    } else
+        suppressMessages(
+            ic$connect(port = port, clientId = clientId))
+
     on.exit({
         ic$disconnect()
     })
@@ -53,7 +58,7 @@ function(ISIN, exchange,
                       currency = character(length(ISIN)))
     row.names(ans) <- paste(ISIN, exchange, sep = " / ")
 
-    
+
     ## fetch received contract data
     contracts <- wrap$Data$contracts
 
@@ -62,13 +67,13 @@ function(ISIN, exchange,
     i <- match(rec, ISIN)
 
 
-    
+
     C <- lapply(contracts, `[[`, 1)
     for (i1 in i)
         for (col in colnames(ans) )
              ans[[col]][i] <- sapply(C, `[[`, col)
 
-   
+
     attr(ans, "contractDetails") <- vector("list", length(ISIN))
     names(attr(ans, "contractDetails")) <- "ISIN"
     attr(ans, "contractDetails")[i] <- contracts

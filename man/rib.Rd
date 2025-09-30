@@ -1,5 +1,6 @@
 \name{rib}
 \alias{contract_details}
+\alias{contract_by_ISIN}
 \alias{executions}
 \alias{order_status}
 \title{

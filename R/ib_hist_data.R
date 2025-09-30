@@ -22,36 +22,40 @@ function(Symbol,
          filename = "%id%__%start%__%end%",
          filename.datetime.fmt = identity,
          backend = "rib",
-         clientId = NULL) {
+         clientId = NULL,
+         wait = 10,
+         max.wait = 300) {
 
     t.type <- "POSIXct"
     if (grepl("day", barSize))
         t.type <- "Date"
 
     if (!dir.exists(directory))
-        stop(sQuote("directory"), " does not exist")
+        stop(sQuote("directory"), " does not exist; please create it first")
 
     all.files <- NULL
     all.data <- NULL
 
     if (is.character(start)) {
-        ## TODO transform date to posix
+        ## TODO transform Date to POSIX
         start <- as.POSIXct(start)
     }
 
     if (is.character(end))
-        ## TODO transform date to posix
+        ## TODO transform Date to POSIX
         end <- as.POSIXct(end)
 
-    if (end < start)
+    if (as.POSIXct(end) < as.POSIXct(start))
         stop("end < start")
 
     if (is.null(id))
         id <- paste0(if (!is.null(Symbol)) Symbol,
+                     "-",
                      if (!is.null(Security_Type)) Security_Type,
+                     "-",
                      if (!is.null(Exchange)) Exchange,
-                     if (!is.null(Currency)) Currency,
-                     collapse = "-")
+                     "-",
+                     if (!is.null(Currency)) Currency)
 
     if (barSize == "5 min") {
         if (verbose)
@@ -59,12 +63,27 @@ function(Symbol,
         barSize <- "5 mins"
     }
 
+    ## DURATION
+    ## S, Seconds
+    ## D, Days
+    ## W, Weeks
+    ## M, Months
+    ## Y, Years
+
+    ## BARSIZE
+    ## secs,   1, 5, 10, 15, 30
+    ## mins,   1, 2, 3, 5, 10, 15, 20, 30
+    ## hours,  1, 2, 3, 4, 8
+    ## day,    1
+    ## weeks,  1
+    ## months, 1
+
 
     if (is.null(durationStr)) {
         if (barSize  == "1 min") {
             durationStr <- "3 D"
         } else if (barSize  == "5 mins") {
-            durationStr <- "5 D"
+            durationStr <- "6 D"
         } else if (barSize  == "1 secs") {
             durationStr <- "2000 S"
         } else if (barSize  == "1 day") {
@@ -77,15 +96,46 @@ function(Symbol,
 
     do.wait <- FALSE
     if (grepl("secs", barSize)) {
+        ## https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/#requests-limitations
         ## https://interactivebrokers.github.io/tws-api/historical_limitations.html
         ## 1 secs , 5 secs , 10 secs , 15 secs , 30 secs
         do.wait <- TRUE
     }
 
+    if (accumulate) {
+        all.data <- NULL
+        all.T <- NULL
+    }
 
-    if (is.null(backend) ||
-        tolower(backend) == "ibrokers") {
 
+    .fdt <- function(s, tz = NULL, t.type = "POSIXct") {
+        if (t.type == "POSIXct") {
+            s <- .POSIXct(s)
+            if (is.character(s)) {
+                if (is.null(tz))
+                    t <- as.POSIXlt(s)
+                else if (tz == "UTC") {
+                    t <- as.POSIXlt(s, tz = "UTC")
+                }
+            } else
+                t <- s
+            t <- as.POSIXct(t)
+            t.utc <- as.POSIXlt(t, tz = "UTC")
+        } else if (t.type == "Date") {
+            t.utc <- strptime(paste(.Date(s), "235959"),
+                              tz = "UTC",
+                              format = "%Y-%m-%d %H%M%S")
+        }
+
+        format(t.utc, "%Y%m%d-%H:%M:%S")
+        ##                   ^ ## hyphen indicates UTC
+    }
+
+
+    if (tolower(backend) == "ibrokers") {
+
+        warning("backend ", sQuote("ibrokers"),
+                " is no longer supported; please use ", sQuote("rib"))
 
         by <- if (barSize  == "1 min")
                   60*60*30
@@ -95,22 +145,21 @@ function(Symbol,
                   1990
 
 
-        twsc <- twsContract(local = Symbol,
-                            sectype  = Security_Type,
-                            exch = Exchange,
-                            currency = Currency,
-                            include_expired =
-                                if (grepl("OPT|FUT|FOP", Security_Type))
-                                    "1" else "0",
-                            conId = "", symbol = "", primary = "",
-                            expiry = "", strike = "", right = "", multiplier = "",
-                            combo_legs_desc = "", comboleg = "", secIdType = "",
-                            secId = "")
+        twsc <- IBrokers::twsContract(
+                              local = Symbol,
+                              sectype  = Security_Type,
+                              exch = Exchange,
+                              currency = Currency,
+                              include_expired =
+                                  if (grepl("OPT|FUT|FOP", Security_Type))
+                                      "1" else "0",
+                              conId = "", symbol = "", primary = "",
+                              expiry = "", strike = "", right = "", multiplier = "",
+                              combo_legs_desc = "", comboleg = "", secIdType = "",
+                              secId = "")
 
         t <- start
 
-        if (accumulate)
-            all.data <- NULL
 
         while (t < end) {
 
@@ -134,15 +183,16 @@ function(Symbol,
 
             tws <- twsConnect(sample.int(1e8, 1), port = port)
             res <- NULL
-            res <- reqHistoricalData(tws,
-                                     endDateTime = strftime(t, format = "%Y%m%d %H:%M:%S"),
-                                     Contract = twsc,
-                                     barSize  = barSize,
-                                     duration = durationStr,
-                                     useRTH = "0",
-                                     whatToShow = whatToShow,
-                                     verbose = FALSE,
-                                     tickerId = "1")
+            res <- reqHistoricalData(
+                tws,
+                endDateTime = strftime(t, format = "%Y%m%d %H:%M:%S"),
+                Contract = twsc,
+                barSize  = barSize,
+                duration = durationStr,
+                useRTH = "0",
+                whatToShow = whatToShow,
+                verbose = FALSE,
+                tickerId = "1")
             close(tws)
 
             if (is.null(res)) {
@@ -222,7 +272,7 @@ function(Symbol,
                 break
 
             if (do.wait)
-                Sys.sleep(10L)
+                Sys.sleep(wait)
         }
         if (accumulate)
             all.data
@@ -232,50 +282,41 @@ function(Symbol,
 
     } else if (tolower(backend) == "rib") {
 
-        .fdt <- function(s, tz = NULL, t.type = "POSIXct") {
-
-            if (t.type == "POSIXct") {
-                s <- .POSIXct(s)
-                if (is.character(s)) {
-                    if (is.null(tz))
-                        t <- as.POSIXlt(s)
-                    else if (tz == "UTC") {
-                        t <- as.POSIXlt(s, tz = "UTC")
-                    }
-                } else
-                    t <- s
-                t <- as.POSIXct(t)
-                t.utc <- as.POSIXlt(t, tz = "UTC")
-            } else if (t.type == "Date") {
-                t.utc <- strptime(paste(.Date(s), "235959"),
-                                  tz = "UTC",
-                                  format = "%Y-%m-%d %H%M%S")
-            }
-
-            format(t.utc, "%Y%m%d-%H:%M:%S")
-        }
-
+        ## if 'Symbol' is a list, it is assumed to be a
+        ## contract; otherwise, symbol, sectype,
+        ## etc. must be specified
         if (is.list(Symbol))
             contract <- Symbol
         else
-            contract <- rib::IBContract(localSymbol = Symbol,
-                                        secType  = Security_Type,
-                                        exchange = Exchange,
-                                        currency = Currency)
+            contract <- rib::IBContract(
+                                 localSymbol = Symbol,
+                                 secType  = Security_Type,
+                                 exchange = Exchange,
+                                 currency = Currency)
 
-        contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
+        ## for derivatives, always include expired
+        ## contracts
+        ## TODO make optional?
+        contract$includeExpired <- grepl("OPT|FUT|FOP",
+                                         contract$secType)
 
-        wr <- .wrap$new(showMessages = TRUE)
+        ## TODO
+        ## optional check via contract_details?
+
+        wr <- .wrap$new(showMessages = verbose)
         ic <- rib::IBClient$new()
 
         cid <- if (is.null(clientId))
                    sample(1e7, size = 1) else clientId
-        ic$connect(port = port, clientId = cid)
+        if (verbose)
+            ic$connect(port = port, clientId = cid)
+        else
+            suppressMessages(ic$connect(port = port, clientId = cid))
         ic$checkMsg(wr)
         on.exit(ic$disconnect())
 
-        tickerId <- "1"
-        ic$reqHeadTimestamp(tickerId = tickerId,
+        reqId <- "1"
+        ic$reqHeadTimestamp(reqId = reqId,
                             contract = contract,
                             whatToShow = whatToShow,
                             useRTH = useRTH,
@@ -284,7 +325,8 @@ function(Symbol,
             Sys.sleep(0.1)
 
         head <- .POSIXct(as.numeric(wr$Data$headTimestamp[["1"]]))
-        if (length(head) && start < head) {
+        if (length(head) &&
+            as.POSIXct(start) < as.POSIXct(head)) {
             message("start changed to ", head)
             start <- head
         }
@@ -297,6 +339,7 @@ function(Symbol,
             end   <- unclass(end)
 
         } else if (t.type == "POSIXct") {
+
             ## start/end become numeric, eg 1731312000
             start <- c(unclass(start))
             end   <- c(unclass(end))
@@ -305,7 +348,6 @@ function(Symbol,
 
         end1 <- end
         while (end1 > start) {
-
             endDateTime <- .fdt(end1, t.type = t.type)
 
             rid <- sample.int(1e7, size = 1)
@@ -313,7 +355,7 @@ function(Symbol,
                                  contract = contract,
                                  endDateTime = endDateTime,
                                  formatDate = 2,
-                                 durationStr = durationStr,
+                                 duration = durationStr,
                                  barSize = barSize,
                                  useRTH = useRTH,
                                  keepUpToDate = FALSE,
@@ -323,15 +365,17 @@ function(Symbol,
             res <- wr$Data$historicalData[[as.character(rid)]]
 
             done <- !is.null(res)
+
             try.start <- Sys.time()
             i <- 0
-            while (!done && i < 10) {
-                message("no data: wait")
+            while (!done && i < 30) {
+                message("no data: wait ", i, " seconds")
                 Sys.sleep(i)
                 i <- i + 1
                 n <- ic$checkMsg(wr, timeout = 0.5)
                 res <- wr$Data$historicalData[[as.character(rid)]]
-                if (as.numeric(Sys.time() - try.start, units = "secs") > 30) {
+                if (as.numeric(Sys.time() -
+                               try.start, units = "secs") > max.wait) {
                     break
                 }
             }
@@ -342,35 +386,43 @@ function(Symbol,
                 break
             }
 
+            M <- lapply(res, function(x) unlist(x[-1]))
+            M <- do.call(rbind, M)
+            T <- unlist(lapply(res, `[[`, 1))
+
             ## returned timestamp is character:
             ## transform to numeric
             if (t.type == "POSIXct") {
-                res$time <- as.numeric(res$time)
+                T <- as.numeric(T)
             } else if (t.type == "Date") {
-                res$time <- unclass(as.Date(res$time, format = "%Y%m%d"))
+                T <- unclass(as.Date(T, format = "%Y%m%d"))
             }
-            end1 <- min(res$time)
+            end1 <- min(T) - if (t.type == "Date") 1 else 0
 
             if (whatToShow == "TRADES") {
-                res <- res[ , 1:8, drop = FALSE]
-                cnames <- c("timestamp", "open", "high", "low", "close",
+                cnames <- c("open", "high", "low", "close",
                             "volume", "vwap", "count")
+
             } else if (whatToShow == "MIDPOINT" ||
                        whatToShow == "BID" ||
                        whatToShow == "ASK" ) {
-                res <- res[ , 1:5, drop = FALSE]
-                cnames <- c("timestamp", "open", "high", "low", "close")
+                ## volume, wap, count are "-1"
+                ## and are dropped
+                M <- M[ , 1:4, drop = FALSE]
+                cnames <- c("open", "high", "low", "close")
+
             } else
                 stop("unknown ibpricetype")
+            colnames(M) <- cnames
 
-            colnames(res) <- cnames
 
             if (accumulate) {
-                all.data <- rbind(res[!res$timestamp %in% all.data$timestamp, ],
-                                  all.data)
+                good <- !T %in% all.T
+                M <- rbind(M[good, ], all.data)
+                all.T <- c(T[good], all.T)
             }
 
-            R <- range(res[["timestamp"]])
+            R <- range(T)
             start.label <- filename.datetime.fmt(R[1])
             end.label   <- filename.datetime.fmt(R[2])
             fn1 <- textutils::fill_in(filename,
@@ -381,7 +433,7 @@ function(Symbol,
                                       delim = c("%", "%"))
             all.files <- c(all.files, fn1)
 
-            write.table(res,
+            write.table(cbind(timestamp = T, M),
                         sep = sep,
                         row.names = FALSE,
                         col.names = TRUE,
@@ -392,29 +444,26 @@ function(Symbol,
             if (end1 <= start)
                 break
 
-            Sys.sleep(14)
+            Sys.sleep(wait)
             ic$checkMsg(wr)
         }
 
         if (accumulate) {
-            if (trim) {
+            if (trim)
                 all.data <-
-                    all.data[all.data$timestamp >= start &
-                             all.data$timestamp <= end, , drop = FALSE]
-            }
+                    all.data[all.T >= start &
+                             all.T <= end, , drop = FALSE]
+
             if (t.type == "POSIXct") {
-                all.data$timestamp <- .POSIXct(all.data$timestamp)
-
+                all.T <- .POSIXct(all.T)
             } else if (t.type == "Date") {
-                all.data$timestamp <-
-                    .Date(all.data$timestamp)
-
+                all.T <- .Date(all.T)
             }
         }
     }
 
     if (accumulate)
-        all.data
+        data.frame(timestamp = all.T, all.data)
     else
         all.files
 }

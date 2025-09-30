@@ -32,6 +32,7 @@ R6::R6Class("IBWrap",
 
             self$Data$headTimestamp  <- list()
             self$Data$historicalData <- list()
+            self$Data$historicalDataReqId <- character()
 
             self$Data$recentMessages <- list()
 
@@ -153,25 +154,24 @@ R6::R6Class("IBWrap",
     updateNewsBulletin= function(msgId, msgType, newsMessage, originExch) warning("default 'updateNewsBulletin' implementation"),
 
     managedAccounts= function(accountsList) {
-      if (self$Settings$showMessages) {
-          cat("Accounts: \n")
-          acc <- paste(paste("  ",
-                             sort(unlist(strsplit(accountsList, ",")))),
-                       collapse = "\n")
-          cat(acc, "\n\n")
-      } else {
-          self$Data$managedAccounts <- sort(unlist(strsplit(accountsList, ",")))
-      }
+        acc <- sort(unlist(strsplit(accountsList, ",")))
+        self$Data$managedAccounts <- acc
+        if (self$Settings$showMessages) {
+            cat("Accounts: \n")
+            acc <- paste(paste("  ", acc), collapse = "\n")
+            cat(acc, "\n\n")
+        }
       invisible(NULL)
     },
 
     receiveFA= function(faDataType, xml) warning("default 'receiveFA' implementation"),
 
     historicalData= function(reqId, bars) {
-        self$Data$historicalData[[as.character(reqId)]] <- bars
+        cid <- as.character(reqId)
+        self$Data$historicalData[[cid]] <- bars
         if (self$Settings$showMessages)
             message("request id: ", reqId, "; received rows: ",
-                    nrow(self$Data$historicalData[[as.character(reqId)]]))
+                    length(self$Data$historicalData[[cid]]))
     },
 
     scannerParameters= function(xml) warning("default 'scannerParameters' implementation"),
@@ -317,7 +317,11 @@ R6::R6Class("IBWrap",
 
     userInfo= function(reqId, whiteBrandingId) warning("default 'userInfo' implementation"),
 
-    historicalDataEnd= function(reqId, startDate, endDate) warning("default 'historicalDataEnd' implementation"),
+    historicalDataEnd= function(reqId, startDate, endDate) {
+        if (self$Settings$showMessages)
+            message("historical-data request complete: ",
+                    startDate, " <-- ", endDate)
+    },
 
     currentTimeInMillis= function(timeInMillis) warning("default 'currentTimeInMillis' implementation")
 

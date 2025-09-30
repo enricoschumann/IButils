@@ -1,3 +1,14 @@
+2025-09-30  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/ib_hist_data.R: update code for 'rib' v0.30.0,
+        as historical data is returned now as a list
+
+        * R/contracts.R (contract_by_ISIN): add function,
+        which creates a contract from ISIN and exchange,
+        which is useful for equities
+
+        * NAMESPACE: export 'contract_by_ISIN'
+
 2025-09-29  Enrico Schumann  <es@enricoschumann.net>
 
         * R/rib.wrap.R (.wrap): update argument names, as

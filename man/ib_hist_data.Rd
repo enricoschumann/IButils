@@ -18,7 +18,8 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
              filename = "\%id\%__\%start\%__\%end\%",
              filename.datetime.fmt = identity,
              backend = "rib",
-             clientId = NULL)
+             clientId = NULL,
+             wait = 10, max.wait = 300)
 }
 \arguments{
   \item{Symbol}{
@@ -95,6 +96,14 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
   \item{trim}{
     logical
   }
+  \item{filename.datetime.fmt}{
+
+    A function, which formats timestamps in filenames.
+    Its single argument is the numeric representation
+    of a timestamp (obtained, e.g., via
+    \code{unclass(<timestamp>)}).
+
+  }
 
   \item{sep}{
     character: the column separator
@@ -117,25 +126,33 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
 
   \item{backend}{a lowercase string or
     \code{NULL}. Supported are \code{ibrokers} or
-    \code{rib}. Default is \code{NULL}, which
-    translates into \code{ibrokers}.
+    \code{rib}. Default is \code{rib}.
   }
 
 }
 \details{
   See IB API documentation \url{https://interactivebrokers.github.io/}
-
   The package uses functionality of either package \pkg{IBrokers}
   or \pkg{rib}, depending on the setting of backend.
+
+  The function tries to download the data between end and start,
+  beginning at the end, and fetching chunks of data defined by
+  \code{durationStr}. See
+  \url{https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/#duration-per-bar}.
+
+  Each chunk is stored, per default, as a flat file in CSV format.
+
 
 }
 \value{
 
-  If \code{accumulate} is \code{TRUE}, a \code{\link{data.frame}}
-  of the retrieved data.  If \code{accumulate} is \code{FALSE}
-  (the default), a character vector: the names of the file
-  (including the directory) that have been saved.
-  Files are written in tsdb format.
+  If \code{accumulate} is \code{TRUE}, a
+  \code{\link{data.frame}} of the retrieved data.  If
+  \code{accumulate} is \code{FALSE} (the default), a
+  character vector: the names of the files (including the
+  directory) that have been saved.  Files are written in
+  tsdb format, which is CSV with timestamps written as
+  their numeric representation.
 
 }
 \author{
@@ -145,9 +162,12 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
 
   \code{\link{combine_files}} for aggregating files
 
+  \code{\link[tsdb]{read_ts_tables}}
+
 }
 \examples{
 \dontrun{
+## define contract via ISIN
 contr <- rib::Contract
 contr$secIdType <- "ISIN"
 contr$secId <- isin <- "DE0005557508"
@@ -160,15 +180,12 @@ download.dir <- "~/Trading/Data/IB_downloads/"
 barSize <- "5 mins"
 whatToShow <- "MIDPOINT"
 
-start <- structure(Sys.time() - 86400 * 7,
-                   class = c("POSIXct", "POSIXt"))
+## previous 10 days
+start <- Sys.time() - 86400 * 10
 
-ib_hist_data(Symbol = Symbol,
-             Security_Type = Security_Type,
-             Exchange = Exchange,
-             Currency = Currency,
-             id = id,
-             directory = download_dir,
+ib_hist_data(contr,
+             id = "DE0005557508__XETRA",
+             directory = download.dir,
              barSize = barSize,
              whatToShow = whatToShow,
              start = start,

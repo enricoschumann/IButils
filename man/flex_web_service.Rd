@@ -9,7 +9,7 @@
 \usage{
 flex_web_service(file, token, query, version = 3, delay = 2,
                  no.write.msg = TRUE, no.write.warn = TRUE,
-                 verbose = TRUE, ...)
+                 verbose = TRUE)
 }
 \arguments{
   \item{file}{
