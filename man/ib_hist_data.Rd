@@ -132,10 +132,13 @@ ib_hist_data(Symbol, Security_Type, Exchange, Currency, id = NULL,
     such as \sQuote{\code{\%id\%}}.
   }
 
-  \item{backend}{a lowercase string or
-    \code{NULL}. Supported are \code{ibrokers} or
-    \code{rib}. Default is \code{rib}.
+  \item{backend}{a lowercase string: default is \code{rib}
   }
+
+  \item{wait}{wait time in seconds between two requests;
+    default is 10}
+
+  \item{max.wait}{maximum time to wait for a response}
 
 }
 \details{

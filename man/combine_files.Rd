@@ -46,6 +46,13 @@ combine_files(directory, max.rows = -1, pattern = NULL,
     character: the column separator
 
   }
+  \item{id.rx}{
+
+    regular expression to extract the \code{id} from filename;
+    needs to include parentheses, as it is called as
+    \code{sub(id.rx, "\\\\1", filenames)}
+
+  }
 }
 \details{
 
