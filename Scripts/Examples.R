@@ -1,8 +1,8 @@
-library("tsdb")
-library("zoo")
-library("plotseries")
 library("IButils")
 library("rib")
+library("zoo")
+library("tsdb")
+library("plotseries")
 
 download.dir <- "~/Downloads/IB/data"
 
@@ -16,14 +16,15 @@ data <- ib_hist_data(
     Exchange = C$exchange,
     Currency = C$currency,
     Security_Type = C$secType,
-    start = as.Date("2025-01-01"),
-    whatToShow = "TRADES",
+    start = as.Date("2010-01-01"),
     barSize = "1 day",
-    duration = "100 D",
+    duration = "10 Y",
     directory = download.dir)
 
+## ... check files:
+list.files(download.dir)
 
-### ... and load files
+### ... and load them:
 ts <- NULL
 for (file in data) {
     ts1 <- read_ts_tables(file,
@@ -35,7 +36,8 @@ for (file in data) {
 plotseries(ts[, "close"])
 
 ### ... combine files
-combine_files(download.dir)
+all.data <- combine_files(download.dir,
+                          pattern = "EXH3-STK-IBIS-EUR")
 
 
 
@@ -65,8 +67,18 @@ data <- ib_hist_data(
     Currency = C$currency,
     whatToShow = "TRADES",
     barSize = "5 mins",
-    duration = "10 D",
-    directory = download.dir)
+    duration = "100 D",
+    directory = download.dir,
+    accumulate = TRUE)
+
+plotseries(data[["close"]], data[["timestamp"]], type = "s")
+
+PMwR::plot_trading_hours(x = data[["close"]],
+                         t = data[["timestamp"]],
+                         fromHHMMSS = "090000",
+                         toHHMMSS   = "172500",
+                         labels = "months")
+
 
 
 ##
@@ -75,11 +87,20 @@ data <- ib_hist_data(
     Exchange = "EUREX",
     Security_Type = "FUT",
     Currency = "EUR",
-    start = as.POSIXct(as.Date("2025-09-01")),
-    whatToShow = "TRADES",
+    start = as.POSIXct(Sys.Date() - 8),
+    end   = as.POSIXct(Sys.Date() - 1),
+    whatToShow = "MIDPOINT",
     barSize = "1 min",
     duration = "2 D",
-    directory = download.dir)
+    directory = download.dir,
+    accumulate = TRUE)
+
+plotseries(data[["close"]], data[["timestamp"]])
+
+PMwR::plot_trading_hours(x = data[["close"]],
+                         t = data[["timestamp"]],
+                         fromHHMMSS = "080000",
+                         toHHMMSS   = "215900")
 
 
 
@@ -87,9 +108,7 @@ data <- ib_hist_data(
 
 
 
-
-
-## Help page
+## Example from help page
 contr <- rib::Contract
 contr$secIdType <- "ISIN"
 contr$secId <- isin <- "DE0005557508"
@@ -101,13 +120,10 @@ contr <- contr$contract
 barSize <- "5 mins"
 whatToShow <- "MIDPOINT"
 
-start <- structure(Sys.time() - 86400 * 7,
-                   class = c("POSIXct", "POSIXt"))
-
 ib_hist_data(contr,
              id = "DE0005557508__XETRA",
              directory = download.dir,
              barSize = barSize,
              whatToShow = whatToShow,
-             start = start,
-             end = Sys.time())
+             start = Sys.time() - 86400 * 8,
+             end   = Sys.time())
