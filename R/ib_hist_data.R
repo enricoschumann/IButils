@@ -369,11 +369,13 @@ function(Symbol,
             try.start <- Sys.time()
             i <- 0
             while (!done && i < 30) {
-                message("no data: wait ", i, " seconds")
+                message("no data received: wait ", i, " seconds")
                 Sys.sleep(i)
                 i <- i + 1
                 n <- ic$checkMsg(wr, timeout = 0.5)
                 res <- wr$Data$historicalData[[as.character(rid)]]
+
+                done <- !is.null(res)
                 if (as.numeric(Sys.time() -
                                try.start, units = "secs") > max.wait) {
                     break
@@ -382,7 +384,7 @@ function(Symbol,
 
 
             if (is.null(res)) {
-                message("no data received")
+                message("no data at all received")
                 break
             }
 
@@ -406,13 +408,15 @@ function(Symbol,
             } else if (whatToShow == "MIDPOINT" ||
                        whatToShow == "BID" ||
                        whatToShow == "ASK" ) {
-                ## volume, wap, count are "-1"
+
+                ## "volume", "wap", "count" are "-1"
                 ## and are dropped
                 M <- M[ , 1:4, drop = FALSE]
                 cnames <- c("open", "high", "low", "close")
 
             } else
                 stop("unknown ibpricetype")
+
             colnames(M) <- cnames
 
 

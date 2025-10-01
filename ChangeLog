@@ -1,5 +1,7 @@
 2025-10-01  Enrico Schumann  <es@enricoschumann.net>
 
+        * R/ib_hist_data.R: fix wait/timeout
+
         * R/rib_wrap.R (wrap0, IBWrapHistData): remove
         file, as these wraps are no longer used.
 
