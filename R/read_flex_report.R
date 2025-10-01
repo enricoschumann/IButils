@@ -1,3 +1,64 @@
+flex_web_service <- function(file, token, query,
+                             version = 3, delay = 2,
+                             no.write.msg = TRUE,
+                             no.write.warn = TRUE,
+                             verbose = TRUE) {
+    if (version != 3)
+        stop("only version 3 is supported")
+    if (!is.character(token))
+        warning(sQuote("token"), " should be character")
+
+    u <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
+                "FlexStatementService.SendRequest",
+                "?t=", token,
+                "&q=", query,
+                "&v=", version)
+    res <- readLines(u)
+    Sys.sleep(delay)
+    if (res[[2L]] == "<Status>Success</Status>") {
+
+        ref_code <- gsub("<.?ReferenceCode>", "", res[[3L]])
+        u2 <- paste0("https://gdcdyn.interactivebrokers.com/Universal/servlet/",
+                     "FlexStatementService.GetStatement?q=", ref_code,
+                     "&t=", token, "&v=", version)
+        tmp <- tempfile()
+        ans <- download.file(u2, tmp, quiet = !verbose)
+
+        do.copy <- TRUE
+        content <- readLines(tmp)
+        if (any(msg <- grepl("^[\"\']MSG", content))) {
+            message("** Message", if (sum(msg) > 1) "s",
+                    " in file ", file, ":")
+            cat(gsub("^[\"\']MSG.*?,", "", content[msg]), sep = "\n")
+            if (no.write.msg) {
+                do.copy <- FALSE
+                message("=> file ", file, " *not* written")
+            }
+            ans <- 1
+        }
+        if (content[[2L]] == "<Status>Warn</Status>") {
+            message("** Warning in file ", file, ":")
+            cat(gsub("<.?ErrorMessage>", "", content[[4L]]), sep = "\n")
+            if (no.write.warn) {
+                do.copy <- FALSE
+                message("=> file ", file, " *not* written")
+            }
+            ans <- 1
+        }
+
+    } else {
+        do.copy <- FALSE
+        cat(res, sep = "\n")
+        ans <- 1
+    }
+
+    if (do.copy)
+        file.copy(tmp, file, overwrite = TRUE)
+    invisible(ans)
+}
+
+
+
 read_flex_report <-
 function(file,
          date.format = "yyyy-MM-dd",

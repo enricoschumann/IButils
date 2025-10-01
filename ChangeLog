@@ -1,5 +1,8 @@
 2025-10-01  Enrico Schumann  <es@enricoschumann.net>
 
+        * R/read_flex_report.R (flex_web_service): move
+        function here, from file 'ib_hist_data.R'
+
         * R/ib_hist_data.R: fix wait/timeout
 
         * R/rib_wrap.R (wrap0, IBWrapHistData): remove
