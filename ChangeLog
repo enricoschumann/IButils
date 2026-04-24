@@ -1,3 +1,11 @@
+2026-04-24  Enrico Schumann  <es@enricoschumann.net>
+
+        * R/read_flex_report.R (flex_web_service): add
+        argument 'date.columns'
+
+        * R/rib.R (latest_price): add function
+        (orders): add argument 'tif', with default "DAY"
+
 2025-10-01  Enrico Schumann  <es@enricoschumann.net>
 
         * R/read_flex_report.R (flex_web_service): move

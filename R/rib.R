@@ -9,6 +9,7 @@ orders <- function(account = "",
                    action,
                    type,
                    lmtPrice,
+                   tif = "DAY",
                    uuid = TRUE) {
 
     res <- data.frame(account,
@@ -21,6 +22,7 @@ orders <- function(account = "",
                       action,
                       type,
                       lmtPrice,
+                      tif,
                       uuid = NA_character_,
                       stringsAsFactors = FALSE)
     if (isTRUE(uuid))
@@ -95,7 +97,7 @@ send_orders <- function(dir, sent.dir, ...,
         order$totalQuantity <- o$amount
         order$orderRef <- o$uuid
         order$account <- o$account
-
+        order$tif <- o$tif
         if (o$type == "LMT") {
             order$orderType <- "LMT"
             order$lmtPrice <- o$lmtPrice
@@ -401,12 +403,18 @@ order_status <- function(port = 7496, clientId = 1) {
     if (!requireNamespace("rib"))
         stop("package ", sQuote("rib"), " is not available")
 
-    wrap <- .wrap$new()
-    ic   <- rib::IBClient$new()
+    wrap <- .wrap$new(storeMessages = TRUE,
+                      showMessages = FALSE)
 
-    capture.output(ic$connect(port = port, clientId = clientId))
-    on.exit(ic$disconnect())
-    capture.output(ic$checkMsg(wrap))
+    ic   <- rib::IBClient$new()
+    ic$connect(port=port, clientId=clientId)
+    ic$checkMsg(wrap)
+
+    on.exit({
+        ic$disconnect()
+        wrap$Settings$storeMessages <- FALSE
+    })
+
 
     ## --------------
     ic$reqAllOpenOrders()
@@ -516,6 +524,100 @@ executions <- function(port = 7496, clientId = 1) {
 
 
 ## }
+
+
+latest_price <- function(localSymbol,
+                         secType,
+                         exchange,
+                         currency,
+                         port = 7496,
+                         clientId = 1) {
+
+    if (!requireNamespace("rib"))
+        stop("package ", sQuote("rib"), " is not available")
+    
+    N <- 0
+    if (is.character(localSymbol)) {
+        N <- max(length(localSymbol),
+                 length(secType),
+                 length(exchange),
+                 length(currency))
+        localSymbol <- rep(localSymbol, N/length(localSymbol))
+        secType     <- rep(secType,     N/length(secType))
+        exchange    <- rep(exchange,    N/length(exchange))
+        currency    <- rep(currency,    N/length(currency))
+        Contracts <- vector("list", length = N)
+        for (i in seq_len(N)) {
+            contract <- rib::Contract
+            contract["localSymbol"] <- localSymbol[i]
+            contract["secType"] <- secType[i]
+            contract["exchange"] <- exchange[i]
+            contract["currency"] <- currency[i]
+
+            Contracts[[i]] <- contract
+        }
+
+    } else {
+        min.common <- 5
+        ## single contract
+        common <- names(rib::Contract) %in% names(localSymbol)
+        if (sum(common) >= min.common) {
+            N <- 1
+            Contracts <- list()
+            contract <- rib::Contract
+            contract[names(localSymbol)] <- localSymbol
+            Contracts[[1]] <- contract
+        } else {
+            common <- lapply(localSymbol,
+                             function(x) {
+                                 sum(names(rib::Contract) %in% names(x)) > min.common
+                             })
+            if (all(unlist(common))) {
+                N <- length(localSymbol)
+                Contracts <- localSymbol
+
+            } else {
+                stop("see doc for 'LocalSymbol'")
+            }
+        }
+    }
+
+
+    wrap <- .wrap$new(storeMessages = TRUE,
+                      showMessages = FALSE)
+
+    ic   <- rib::IBClient$new()
+
+    msg1 <- ic$connect(port = port, clientId = clientId)
+    on.exit(ic$disconnect())
+    n <- ic$checkMsg(wrap)
+    while (n > 0) {
+        Sys.sleep(0.2)
+        n <- ic$checkMsg(wrap)
+    }
+
+    ans <- vector("list", length = N)
+    for (i in seq_len(N)) {
+        contract <- Contracts[[i]]
+        contract$includeExpired <- grepl("OPT|FUT|FOP", contract$secType)
+        ic$reqContractDetails("1", contract = contract)
+        n <- ic$checkMsg(wrap)
+        while (n > 0) {
+            Sys.sleep(0.2)
+            n <- ic$checkMsg(wrap)
+        }
+
+        ans[[i]] <- wrap$Data$contracts[["1"]]
+    }
+
+    msg <- as.data.frame(do.call(rbind, wrap$Data$recentMessages))
+    colnames(msg) <- c("id", "errorTime", "errorCode",
+                       "errorString", "advancedOrderRejectJson")
+    attr(ans, "messages") <- msg
+    ans
+
+    
+}
 
 
 contract_details <- function(localSymbol,

@@ -24,6 +24,8 @@ flex_web_service <- function(file, token, query,
         tmp <- tempfile()
         ans <- download.file(u2, tmp, quiet = !verbose)
 
+        ## TODO check ans
+
         do.copy <- TRUE
         content <- readLines(tmp)
         if (any(msg <- grepl("^[\"\']MSG", content))) {
@@ -64,6 +66,7 @@ function(file,
          date.format = "yyyy-MM-dd",
          time.format = "HH:mm:ss",
          date.time.separator = ",",
+         date.columns = NULL,
          ...,
          fill = FALSE) {
 
@@ -123,7 +126,18 @@ function(file,
             else
                 S <- merge(S, ans[[a]][[sec]], all = TRUE)
         }
+
+        if (!is.null(date.columns)) {
+            for (date.column in date.columns) {
+                S[[date.column]] <-
+                    as.Date(as.character(S[[date.column]]),
+                            format = date.format)
+            }
+        }
         ans1[[sec]] <- S
     }
+
+
+
     ans1
 }
