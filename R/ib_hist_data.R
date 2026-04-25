@@ -235,7 +235,8 @@ function(Symbol,
                                 "volume", "vwap", "count")
                 } else if (whatToShow == "MIDPOINT" ||
                            whatToShow == "BID" ||
-                           whatToShow == "ASK" ) {
+                           whatToShow == "ASK" ||
+                           whatToShow == "BID_ASK") {
                     data <- data[ , 1:4, drop = FALSE]
                     cnames <- c("timestamp", "open", "high", "low", "close")
                 } else
@@ -405,9 +406,8 @@ function(Symbol,
                 cnames <- c("open", "high", "low", "close",
                             "volume", "vwap", "count")
 
-            } else if (whatToShow == "MIDPOINT" ||
-                       whatToShow == "BID" ||
-                       whatToShow == "ASK" ) {
+            } else if (whatToShow %in%
+                       c("MIDPOINT", "BID", "ASK", "BID_ASK")) {
 
                 ## "volume", "wap", "count" are "-1"
                 ## and are dropped
